@@ -82,6 +82,11 @@ void Record::save(std::ostream &os) const
     os << ID << " " << medium << " " << rating << " " << title << "\n";
 }
 
+bool Record::operator==(const Record &rhs) const
+{
+    return title == rhs.title || ID == rhs.ID;
+}
+
 // Print a Record's data to the stream without a final endl.
 // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
 // If the rating is zero, a 'u' is printed instead of the rating.

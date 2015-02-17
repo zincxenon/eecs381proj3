@@ -66,6 +66,8 @@ public:
     // This operator defines the order relation between Records, based just on the last title
     bool operator<(const Record &rhs) const { return title < rhs.title; }
 
+    bool operator==(const Record &rhs) const;
+
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
 
 private:

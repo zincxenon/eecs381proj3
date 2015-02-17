@@ -5,435 +5,166 @@
 #include <cctype>
 #include <string>
 #include <vector>
+#include <set>
+#include <algorithm>
+#include <unordered_map>
 #include "Record.h"
 #include "Collection.h"
 #include "Utility.h"
 
 using namespace std;
 
+/* data types */
+
+struct data_container {
+    set<Collection> catalog;
+    vector<Record*> library_title;
+    vector<Record*> library_id;
+};
+
+typedef bool (*function)(data_container&);
+
 struct record_id_comp {
     bool operator() (const Record *lhs, const Record *rhs) const { return lhs->get_ID() < rhs->get_ID(); }
 };
 
-void throw_unrecognized_command();
+/* lib cat helper functions dec */
 
-Record* read_title_get_record(vector<Record*, Less_than_ptr<Record*>>& library_title);
-vector<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(vector<Record*, Less_than_ptr<Record*>>& library_title);
+Record* read_title_get_record(data_container& lib_cat);
+vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat);
 
-Record* read_id_get_record(vector<Record*, record_id_comp>& library_id);
-vector<Record*, record_id_comp>::Iterator read_id_get_iter(vector<Record*, record_id_comp>& library_id);
+Record* read_id_get_record(data_container& lib_cat);
+vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat);
 
-Collection* read_name_get_collection(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
-vector<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
+Collection read_name_get_collection(data_container& lib_cat);
+set<Collection>::Iterator read_name_get_iter(data_container& lib_cat);
 
-void clear_libraries(vector<Record*, Less_than_ptr<Record*>>& library_title, vector<Record*, record_id_comp>& library_id);
-void clear_catalog(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
+void clear_libraries(data_container& lib_cat);
+void clear_catalog(data_container& lib_cat);
 
-bool check_collection_not_empty(Collection *collection);
-bool check_record_in_collection(Collection *collection, Record *record);
-
-void print_record(Record* record);
-void print_collection(Collection* collection);
+/* other functions dec */
 
 string title_read(istream &is);
 string parse_title(string& title_string);
 
+/* main lib cat functions dec */
+
+bool find_record(data_container& lib_cat);
+bool find_string(data_container& lib_cat);
+
+bool list_ratings(data_container& lib_cat);
+
+bool print_record(data_container& lib_cat);
+bool print_collection(data_container& lib_cat);
+bool print_library(data_container& lib_cat);
+bool print_catalog(data_container& lib_cat);
+bool print_allocation(data_container& lib_cat);
+
+bool collection_statistics(data_container& lib_cat);
+bool combine_collections(data_container& lib_cat);
+
+bool modify_rating(data_container& lib_cat);
+bool modify_title(data_container& lib_cat);
+
+bool add_record(data_container& lib_cat);
+bool add_collection(data_container& lib_cat);
+bool add_member(data_container& lib_cat);
+
+bool delete_record(data_container& lib_cat);
+bool delete_collection(data_container& lib_cat);
+bool delete_member(data_container& lib_cat);
+
+bool clear_library(data_container& lib_cat);
+bool clear_catalog(data_container& lib_cat);
+bool clear_all(data_container& lib_cat);
+
+bool save_all(data_container& lib_cat);
+
+bool restore_all(data_container& lib_cat);
+
+bool quit(data_container& lib_cat);
+
+/* main */
+
 int main()
 {
-    vector<Collection*, Less_than_ptr<Collection*>> catalog;
-    vector<Record*, Less_than_ptr<Record*>> library_title;
-    vector<Record*, record_id_comp> library_id;
+
+    data_container lib_cat;
+    unordered_map<string, function> function_map {
+            {"fr", find_record},
+            {"fs", find_string},
+
+            {"lr", list_ratings},
+
+            {"pr", print_record},
+            {"pc", print_collection},
+            {"pL", print_library},
+            {"pC", print_catalog},
+            {"pa", print_allocation},
+
+            {"cs", collection_statistics},
+            {"cc", combine_collections},
+
+            {"mr", modify_rating},
+            {"mt", modify_title},
+
+            {"ar", add_record},
+            {"ac", add_collection},
+            {"am", add_member},
+
+            {"dr", delete_record},
+            {"dc", delete_collection},
+            {"dm", delete_member},
+
+            {"cL", clear_library},
+            {"cC", clear_catalog},
+            {"cA", clear_all},
+
+            {"sA", save_all},
+
+            {"rA", restore_all},
+
+            {"qq", quit}
+    };
     while (true)
     {
         try
         {
             char action, object;
             cout << "\nEnter command: ";
-            if (!(cin >> action >> object))
+            if (!(cin >> action >> object) || function_map.find(action + object) == function_map.end())
             {
-                throw_unrecognized_command();
+                throw Error("Unrecognized command!");
             }
-            switch (action)
+            if (function_map[action + object](lib_cat))
             {
-                case 'f': /* find (records only) */
-                {
-                    switch (object)
-                    {
-                        case 'r': /* find record */
-                        {
-                            auto record_ptr = read_title_get_record(library_title);
-                            cout << *record_ptr << "\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'p': /* print */
-                {
-                    switch (object)
-                    {
-                        case 'r': /* print record */
-                        {
-                            Record *record_ptr = read_id_get_record(library_id);
-                            cout << *record_ptr << "\n";
-                            break;
-                        }
-                        case 'c': /* print collection */
-                        {
-                            Collection *collection_ptr = read_name_get_collection(catalog);
-                            cout << *collection_ptr << "\n";
-                            break;
-                        }
-                        case 'L': /* print library */
-                        {
-                            if (library_title.empty())
-                            {
-                                cout << "Library is empty\n";
-                            }
-                            else
-                            {
-                                cout << "Library contains " << library_title.size() << " records:";
-                                apply(library_title.begin(), library_title.end(), print_record);
-                                cout << "\n";
-                            }
-                            break;
-                        }
-                        case 'C': /* print catalog */
-                        {
-                            if (catalog.empty())
-                            {
-                                cout << "Catalog is empty\n";
-                            }
-                            else
-                            {
-                                cout << "Catalog contains " << catalog.size() << " collections:";
-                                apply(catalog.begin(), catalog.end(), print_collection);
-                                cout << "\n";
-                            }
-                            break;
-                        }
-                        case 'a': /* print memory allocations */
-                        {
-                            cout << "Memory allocations:\n";
-                            cout << "Records: " << library_title.size() << "\n";
-                            cout << "Collections: " << catalog.size() << "\n";
-                            cout << "Lists: " << g_vector_count << "\n";
-                            cout << "List Nodes: " << g_vector_Node_count << "\n";
-                            cout << "strings: " << string::get_number() << " with " << string::get_total_allocation() << " bytes total\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'm': /* modify (rating only) */
-                {
-                    switch (object)
-                    {
-                        case 'r': /* modify rating of a record */
-                        {
-                            Record *record_ptr = read_id_get_record(library_id);
-                            int rating = integer_read();
-                            record_ptr->set_rating(rating);
-                            cout << "Rating for record " << record_ptr->get_ID() << " changed to " << rating << "\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'a': /* add */
-                {
-                    switch (object)
-                    {
-                        case 'r': /* add record */
-                        {
-                            string medium, title;
-                            cin >> medium;
-                            title = title_read(cin);
-                            Record temp_record(title);
-                            if (library_title.find(&temp_record) != library_title.end())
-                            {
-                                throw Error("Library already has a record with this title!");
-                            }
-                            Record *record = new Record(medium, title);
-                            library_id.insert(record);
-                            library_title.insert(record);
-                            cout << "Record " << record->get_ID() << " added\n";
-                            break;
-                        }
-                        case 'c': /* add collection */
-                        {
-                            string name;
-                            cin >> name;
-                            Collection temp_collection(name);
-                            if (catalog.find(&temp_collection) != catalog.end())
-                            {
-                                throw Error("Catalog already has a collection with this name!");
-                            }
-                            catalog.insert(new Collection(name));
-                            cout << "Collection " << name << " added\n";
-                            break;
-                        }
-                        case 'm': /* add record to collection */
-                        {
-                            Collection *collection_ptr = read_name_get_collection(catalog);
-                            Record *record_ptr = read_id_get_record(library_id);
-                            collection_ptr->add_member(record_ptr);
-                            cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " added\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'd': /* delete */
-                {
-                    switch (object)
-                    {
-                        case 'r': /* delete record */
-                        {
-                            auto record_iter = read_title_get_iter(library_title);
-                            if (apply_if_arg(catalog.begin(), catalog.end(), check_record_in_collection, *record_iter))
-                            {
-                                throw Error("Cannot delete a record that is a member of a collection!");
-                            }
-                            Record *record_ptr = *record_iter;
-                            library_title.erase(record_iter);
-                            library_id.erase(library_id.find(record_ptr));
-                            cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
-                            delete record_ptr;
-                            break;
-                        }
-                        case 'c': /* delete collection */
-                        {
-                            auto collection_iter = read_name_get_iter(catalog);
-                            Collection *collection_ptr = *collection_iter;
-                            catalog.erase(collection_iter);
-                            cout << "Collection " << collection_ptr->get_name() << " deleted\n";
-                            delete collection_ptr;
-                            break;
-                        }
-                        case 'm': /* delete record from collection */
-                        {
-                            Collection *collection_ptr = read_name_get_collection(catalog);
-                            Record *record_ptr = read_id_get_record(library_id);
-                            collection_ptr->remove_member(record_ptr);
-                            cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'c': /* clear */
-                {
-                    switch (object)
-                    {
-                        case 'L': /* clear library */
-                        {
-                            if (apply_if(catalog.begin(), catalog.end(), check_collection_not_empty))
-                            {
-                                throw Error("Cannot clear all records unless all collections are empty!");
-                            }
-                            Record::reset_ID_counter();
-                            clear_libraries(library_title, library_id);
-                            cout << "All records deleted\n";
-                            break;
-                        }
-                        case 'C': /* clear catalog */
-                        {
-                            clear_catalog(catalog);
-                            cout << "All collections deleted\n";
-                            break;
-                        }
-                        case 'A': /* clear all */
-                        {
-                            Record::reset_ID_counter();
-                            clear_libraries(library_title, library_id);
-                            clear_catalog(catalog);
-                            cout << "All data deleted\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 's': /* save */
-                {
-                    switch (object)
-                    {
-                        case 'A': /* save all */
-                        {
-                            string filename;
-                            cin >> filename;
-                            ofstream file(filename.c_str());
-                            if (!file)
-                            {
-                                throw Error("Could not open file!");
-                            }
-                            file << library_title.size() << "\n";
-                            for (auto&& record : library_title)
-                            {
-                                record->save(file);
-                            }
-                            file << catalog.size() << "\n";
-                            for (auto catalog_iter = catalog.begin(); catalog_iter != catalog.end(); ++catalog_iter)
-                            {
-                                (*catalog_iter)->save(file);
-                            }
-                            cout << "Data saved\n";
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'r': /* restore */
-                {
-                    switch (object)
-                    {
-                        case 'A': /* restore all */
-                        {
-                            string filename;
-                            cin >> filename;
-                            ifstream file(filename.c_str());
-                            if (!file)
-                            {
-                                throw Error("Could not open file!");
-                            }
-                            int num;
-                            file >> num;
-                            vector<Collection*, Less_than_ptr<Collection*>> new_catalog;
-                            vector<Record*, Less_than_ptr<Record*>> new_library_title;
-                            vector<Record*, record_id_comp> new_library_id;
-                            try
-                            {
-                                Record::save_ID_counter();
-                                Record::reset_ID_counter();
-                                while (num > 0)
-                                {
-                                    Record *record_ptr = new Record(file);
-                                    new_library_title.insert(record_ptr);
-                                    new_library_id.insert(record_ptr);
-                                    num--;
-                                }
-                                if (!(file >> num))
-                                {
-                                    throw_file_error();
-                                }
-                                while (num > 0)
-                                {
-                                    Collection *collection_ptr = new Collection(file, new_library_title);
-                                    new_catalog.insert(collection_ptr);
-                                    num--;
-                                }
-                                clear_libraries(library_title, library_id);
-                                clear_catalog(catalog);
-                                library_title = new_library_title;
-                                library_id = new_library_id;
-                                catalog = new_catalog;
-                                cout << "Data loaded\n";
-                            }
-                            catch (Error& e)
-                            {
-                                clear_catalog(new_catalog);
-                                clear_libraries(new_library_title, new_library_id);
-                                Record::restore_ID_counter();
-                                throw_file_error();
-                            }
-                            break;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case 'q': /* quit */
-                {
-                    switch (object)
-                    {
-                        case 'q': /* quit */
-                        {
-                            clear_libraries(library_title, library_id);
-                            clear_catalog(catalog);
-                            cout << "All data deleted\nDone\n";
-                            return 0;
-                        }
-                        default:
-                        {
-                            throw_unrecognized_command();
-                            break;
-                        }
-                    }
-                    break;
-                }
-                default:
-                {
-                    throw_unrecognized_command();
-                    break;
-                }
+                return 0;
             }
         } catch (Error& e)
         {
             cout << e.msg << "\n";
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        } catch (string_exception& e)
+        } catch (...)
         {
-            cerr << e.msg << "\n";
+            // print error message
             return 1;
         }
     }
 }
 
-void throw_unrecognized_command()
+/* lib cat helper functions impl */
+
+Record* read_title_get_record(data_container& lib_cat)
 {
-    throw Error("Unrecognized command!");
+    return *read_title_get_iter(lib_cat);
 }
 
-Record* read_title_get_record(vector<Record*, Less_than_ptr<Record*>>& library_title)
-{
-    return *read_title_get_iter(library_title);
-}
-
-vector<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(vector<Record*, Less_than_ptr<Record*>>& library_title)
+vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat)
 {
     string title = title_read(cin);
     Record temp_record(title);
-    auto record_iter = library_title.find(&temp_record);
+    auto record_iter = find(library_title.begin(), library_title.end(), &temp_record);
     if (record_iter == library_title.end())
     {
         throw Error("No record with that title!");
@@ -441,83 +172,65 @@ vector<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(vector<Rec
     return record_iter;
 }
 
-Record* read_id_get_record(vector<Record*, record_id_comp>& library_id)
+Record* read_id_get_record(data_container& lib_cat)
 {
-    return *read_id_get_iter(library_id);
+    return *read_id_get_iter(lib_cat);
 }
 
-vector<Record*, record_id_comp>::Iterator read_id_get_iter(vector<Record*, record_id_comp>& library_id)
+vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     Record temp_record(id);
-    auto record_iter = library_id.find(&temp_record);
-    if (record_iter == library_id.end())
+    auto record_iter = find(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record);
+    if (record_iter == lib_cat.library_id.end())
     {
         throw Error("No record with that ID!");
     }
     return record_iter;
 }
 
-Collection* read_name_get_collection(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
+Collection read_name_get_collection(data_container& lib_cat)
 {
-    return *read_name_get_iter(catalog);
+    return *read_name_get_iter(lib_cat);
 }
 
-vector<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
+set<Collection>::Iterator read_name_get_iter(data_container& lib_cat)
 {
     string name;
     cin >> name;
     Collection temp_collection(name);
-    auto collection_iter = catalog.find(&temp_collection);
-    if (collection_iter == catalog.end())
+    auto collection_iter = lib_cat.catalog.find(&temp_collection);
+    if (collection_iter == lib_cat.catalog.end())
     {
         throw Error("No collection with that name!");
     }
     return collection_iter;
 }
 
-void clear_libraries(vector<Record*, Less_than_ptr<Record*>>& library_title, vector<Record*, record_id_comp>& library_id)
+void clear_libraries(data_container& lib_cat)
 {
-    auto title_iter = library_title.begin();
-    while (title_iter != library_title.end())
+    auto title_iter = lib_cat.library_title.begin();
+    while (title_iter != lib_cat.library_title.end())
     {
         delete *title_iter;
         ++title_iter;
     }
-    library_title.clear();
-    library_id.clear();
+    lib_cat.library_title.clear();
+    lib_cat.library_id.clear();
 }
 
-void clear_catalog(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
+void clear_catalog(data_container& lib_cat)
 {
-    auto catalog_iter = catalog.begin();
-    while (catalog_iter != catalog.end())
+    auto catalog_iter = lib_cat.catalog.begin();
+    while (catalog_iter != lib_cat.catalog.end())
     {
         delete *catalog_iter;
         ++catalog_iter;
     }
-    catalog.clear();
+    lib_cat.catalog.clear();
 }
 
-bool check_collection_not_empty(Collection *collection)
-{
-    return !(collection->empty());
-}
-
-bool check_record_in_collection(Collection *collection, Record *record)
-{
-    return collection->is_member_present(record);
-}
-
-void print_record(Record* record)
-{
-    cout << "\n" << *record;
-}
-
-void print_collection(Collection* collection)
-{
-    cout << "\n" << *collection;
-}
+/* other functions impl */
 
 string title_read(istream &is)
 {
@@ -559,4 +272,251 @@ string parse_title(string& title_string)
         title.remove(title.size() - 1, 1);
     }
     return title;
+}
+
+/* main lib cat functions impl */
+
+bool find_record(data_container& lib_cat)
+{
+    auto record_ptr = read_title_get_record(lib_cat.library_title);
+    cout << *record_ptr << "\n";
+    return false;
+}
+bool find_string(data_container& lib_cat);
+
+bool list_ratings(data_container& lib_cat);
+
+bool print_record(data_container& lib_cat)
+{
+    Record *record_ptr = read_id_get_record(lib_cat.library_id);
+    cout << *record_ptr << "\n";
+    return false;
+}
+bool print_collection(data_container& lib_cat)
+{
+    Collection collection = read_name_get_collection(lib_cat.catalog);
+    cout << collection << "\n";
+    return false;
+}
+bool print_library(data_container& lib_cat)
+{
+    if (lib_cat.library_title.empty())
+    {
+        cout << "Library is empty\n";
+    }
+    else
+    {
+        cout << "Library contains " << lib_cat.library_title.size() << " records:";
+        //apply(lib_cat.library_title.begin(), lib_cat.library_title.end(), print_record);
+        cout << "\n";
+    }
+    return false;
+}
+bool print_catalog(data_container& lib_cat)
+{
+    if (lib_cat.catalog.empty())
+    {
+        cout << "Catalog is empty\n";
+    }
+    else
+    {
+        cout << "Catalog contains " << lib_cat.catalog.size() << " collections:";
+        //apply(lib_cat.catalog.begin(), lib_cat.catalog.end(), print_collection);
+        cout << "\n";
+    }
+    return false;
+}
+bool print_allocation(data_container& lib_cat)
+{
+    cout << "Memory allocations:\n";
+    cout << "Records: " << lib_cat.library_title.size() << "\n";
+    cout << "Collections: " << lib_cat.catalog.size() << "\n";
+    return false;
+}
+
+bool collection_statistics(data_container& lib_cat);
+bool combine_collections(data_container& lib_cat);
+
+bool modify_rating(data_container& lib_cat)
+{
+    Record *record_ptr = read_id_get_record(lib_cat.library_id);
+    int rating = integer_read();
+    record_ptr->set_rating(rating);
+    cout << "Rating for record " << record_ptr->get_ID() << " changed to " << rating << "\n";
+    return false;
+}
+bool modify_title(data_container& lib_cat);
+
+bool add_record(data_container& lib_cat)
+{
+    string medium, title;
+    cin >> medium;
+    title = title_read(cin);
+    Record temp_record(title);
+    if (find(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record) != lib_cat.library_title.end())
+    {
+        throw Error("Library already has a record with this title!");
+    }
+    // try catch here
+    Record *record = new Record(medium, title);
+    lib_cat.library_id.insert(record);
+    lib_cat.library_title.insert(record);
+    cout << "Record " << record->get_ID() << " added\n";
+    return false;
+}
+bool add_collection(data_container& lib_cat)
+{
+    string name;
+    cin >> name;
+    Collection collection(name);
+    if (lib_cat.catalog.find(temp_collection) != lib_cat.catalog.end())
+    {
+        throw Error("Catalog already has a collection with this name!");
+    }
+    lib_cat.catalog.insert(collection);
+    cout << "Collection " << name << " added\n";
+    return false;
+}
+bool add_member(data_container& lib_cat)
+{
+    Collection collection = read_name_get_collection(lib_cat.catalog);
+    Record *record_ptr = read_id_get_record(lib_cat.library_id);
+    collection.add_member(record_ptr);
+    cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " added\n";
+    return false;
+}
+
+bool delete_record(data_container& lib_cat)
+{
+    auto record_iter = read_title_get_iter(library_title);
+    if (apply_if_arg(lib_cat.catalog.begin(), lib_cat.catalog.end(), check_record_in_collection, *record_iter))
+    {
+        throw Error("Cannot delete a record that is a member of a collection!");
+    }
+    Record *record_ptr = *record_iter;
+    lib_cat.library_title.erase(record_iter);
+    lib_cat.library_id.erase(find(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr));
+    cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
+    delete record_ptr;
+    return false;
+}
+bool delete_collection(data_container& lib_cat)
+{
+    auto collection_iter = read_name_get_iter(lib_cat.catalog);
+    Collection collection = *collection_iter;
+    lib_cat.catalog.erase(collection_iter);
+    cout << "Collection " << collection.get_name() << " deleted\n";
+    delete collection_ptr;
+    return false;
+}
+bool delete_member(data_container& lib_cat)
+{
+    Collection collection = read_name_get_collection(lib_cat.catalog);
+    Record *record_ptr = read_id_get_record(library_id);
+    collection.remove_member(record_ptr);
+    cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
+    return false;
+}
+
+bool clear_library(data_container& lib_cat)
+{
+    if (apply_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), check_collection_not_empty))
+    {
+        throw Error("Cannot clear all records unless all collections are empty!");
+    }
+    Record::reset_ID_counter();
+    clear_libraries(lib_cat);
+    cout << "All records deleted\n";
+    return false;
+}
+bool clear_catalog(data_container& lib_cat)
+{
+    clear_catalog(lib_cat);
+    cout << "All collections deleted\n";
+    return false;
+}
+bool clear_all(data_container& lib_cat)
+{
+    Record::reset_ID_counter();
+    clear_libraries(lib_cat);
+    clear_catalog(lib_cat.catalog);
+    cout << "All data deleted\n";
+    return false;
+}
+
+bool save_all(data_container& lib_cat)
+{
+    string filename;
+    cin >> filename;
+    ofstream file(filename.c_str());
+    if (!file)
+    {
+        throw Error("Could not open file!");
+    }
+    file << lib_cat.library_title.size() << "\n";
+    for (auto&& record : library_title)
+    {
+        record->save(file);
+    }
+    file << lib_cat.catalog.size() << "\n";
+    for (auto catalog_iter = lib_cat.catalog.begin(); catalog_iter != lib_cat.catalog.end(); ++catalog_iter)
+    {
+        (*catalog_iter)->save(file);
+    }
+    cout << "Data saved\n";
+    return false;
+}
+
+bool restore_all(data_container& lib_cat)
+{
+    string filename;
+    cin >> filename;
+    ifstream file(filename.c_str());
+    if (!file)
+    {
+        throw Error("Could not open file!");
+    }
+    int num;
+    file >> num;
+    data_container new_lib_cat
+    try
+    {
+        Record::save_ID_counter();
+        Record::reset_ID_counter();
+        while (num > 0)
+        {
+            Record *record_ptr = new Record(file);
+            lib_cat.library_title.insert(record_ptr);
+            lib_cat.library_id.insert(record_ptr);
+            num--;
+        }
+        if (!(file >> num))
+        {
+            throw_file_error();
+        }
+        while (num > 0)
+        {
+            Collection collection(file, lib_cat.library_title);
+            lib_cat.catalog.insert(collection_ptr);
+            num--;
+        }
+        clear_libraries(lib_cat);
+        clear_catalog(lib_cat);
+        lib_cat = new_lib_cat;
+        cout << "Data loaded\n";
+    }
+    catch (Error& e)
+    {
+        clear_catalog(new_lib_cat);
+        clear_libraries(new_lib_cat);
+        Record::restore_ID_counter();
+        throw_file_error();
+    }
+    return false;
+}
+
+bool quit(data_container& lib_cat)
+{
+    clear_all(lib_cat);
+    cout << "Done\n";
 }

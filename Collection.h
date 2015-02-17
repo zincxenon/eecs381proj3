@@ -27,7 +27,7 @@ public:
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
 	std::string data input is read directly into the member variable. */
-    Collection(std::ifstream& is, const Ordered_list<Record*, Less_than_ptr<Record*>>& library);
+    Collection(std::ifstream& is, const vector<Record*>& library);
 
 	// Accessors
 	std::string get_name() const
@@ -56,7 +56,7 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
 		
 private:
-    std::vector<Record*, Less_than_ptr<Record*>> elements;
+    std::vector<Record*> elements;
 	std::string name;
 
     void print_record_title(Record* record, std::ostream& os);
