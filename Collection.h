@@ -3,11 +3,10 @@
 
 #include <fstream>
 #include <ostream>
-#include "p2_globals.h"
 #include "Utility.h"
 #include "Record.h"
-#include "Ordered_list.h"
-#include "String.h"
+#include <string>
+#include <vector>
 
 /* Collections contain a name and a container of members,
 represented as pointers to Records.
@@ -19,7 +18,7 @@ class Collection {
 
 public:
 	// Construct a collection with the specified name and no members
-	Collection(const String& name_)
+	Collection(const std::string& name_)
         { name = name_; }
 	
 	/* Construct a Collection from an input file stream in save format, using the record list,
@@ -27,11 +26,11 @@ public:
 	Record list is needed to resolve references to record members.
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
-	String data input is read directly into the member variable. */
+	std::string data input is read directly into the member variable. */
     Collection(std::ifstream& is, const Ordered_list<Record*, Less_than_ptr<Record*>>& library);
 
 	// Accessors
-	String get_name() const
+	std::string get_name() const
 		{return name;}
 		
 	// Add the Record, throw exception if there is already a Record with the same title.
@@ -57,8 +56,8 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
 		
 private:
-    Ordered_list<Record*, Less_than_ptr<Record*>> elements;
-	String name;
+    std::vector<Record*, Less_than_ptr<Record*>> elements;
+	std::string name;
 
     void print_record_title(Record* record, std::ostream& os);
 };

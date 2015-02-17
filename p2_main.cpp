@@ -3,12 +3,11 @@
 #include <limits>
 #include <istream>
 #include <cctype>
-#include "String.h"
-#include "Ordered_list.h"
+#include <string>
+#include <vector>
 #include "Record.h"
 #include "Collection.h"
 #include "Utility.h"
-#include "p2_globals.h"
 
 using namespace std;
 
@@ -18,17 +17,17 @@ struct record_id_comp {
 
 void throw_unrecognized_command();
 
-Record* read_title_get_record(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title);
-Ordered_list<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title);
+Record* read_title_get_record(vector<Record*, Less_than_ptr<Record*>>& library_title);
+vector<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(vector<Record*, Less_than_ptr<Record*>>& library_title);
 
-Record* read_id_get_record(Ordered_list<Record*, record_id_comp>& library_id);
-Ordered_list<Record*, record_id_comp>::Iterator read_id_get_iter(Ordered_list<Record*, record_id_comp>& library_id);
+Record* read_id_get_record(vector<Record*, record_id_comp>& library_id);
+vector<Record*, record_id_comp>::Iterator read_id_get_iter(vector<Record*, record_id_comp>& library_id);
 
-Collection* read_name_get_collection(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog);
-Ordered_list<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog);
+Collection* read_name_get_collection(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
+vector<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
 
-void clear_libraries(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title, Ordered_list<Record*, record_id_comp>& library_id);
-void clear_catalog(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog);
+void clear_libraries(vector<Record*, Less_than_ptr<Record*>>& library_title, vector<Record*, record_id_comp>& library_id);
+void clear_catalog(vector<Collection*, Less_than_ptr<Collection*>>& catalog);
 
 bool check_collection_not_empty(Collection *collection);
 bool check_record_in_collection(Collection *collection, Record *record);
@@ -36,14 +35,14 @@ bool check_record_in_collection(Collection *collection, Record *record);
 void print_record(Record* record);
 void print_collection(Collection* collection);
 
-String title_read(istream &is);
-String parse_title(String& title_string);
+string title_read(istream &is);
+string parse_title(string& title_string);
 
 int main()
 {
-    Ordered_list<Collection*, Less_than_ptr<Collection*>> catalog;
-    Ordered_list<Record*, Less_than_ptr<Record*>> library_title;
-    Ordered_list<Record*, record_id_comp> library_id;
+    vector<Collection*, Less_than_ptr<Collection*>> catalog;
+    vector<Record*, Less_than_ptr<Record*>> library_title;
+    vector<Record*, record_id_comp> library_id;
     while (true)
     {
         try
@@ -123,9 +122,9 @@ int main()
                             cout << "Memory allocations:\n";
                             cout << "Records: " << library_title.size() << "\n";
                             cout << "Collections: " << catalog.size() << "\n";
-                            cout << "Lists: " << g_Ordered_list_count << "\n";
-                            cout << "List Nodes: " << g_Ordered_list_Node_count << "\n";
-                            cout << "Strings: " << String::get_number() << " with " << String::get_total_allocation() << " bytes total\n";
+                            cout << "Lists: " << g_vector_count << "\n";
+                            cout << "List Nodes: " << g_vector_Node_count << "\n";
+                            cout << "strings: " << string::get_number() << " with " << string::get_total_allocation() << " bytes total\n";
                             break;
                         }
                         default:
@@ -162,7 +161,7 @@ int main()
                     {
                         case 'r': /* add record */
                         {
-                            String medium, title;
+                            string medium, title;
                             cin >> medium;
                             title = title_read(cin);
                             Record temp_record(title);
@@ -178,7 +177,7 @@ int main()
                         }
                         case 'c': /* add collection */
                         {
-                            String name;
+                            string name;
                             cin >> name;
                             Collection temp_collection(name);
                             if (catalog.find(&temp_collection) != catalog.end())
@@ -291,7 +290,7 @@ int main()
                     {
                         case 'A': /* save all */
                         {
-                            String filename;
+                            string filename;
                             cin >> filename;
                             ofstream file(filename.c_str());
                             if (!file)
@@ -325,7 +324,7 @@ int main()
                     {
                         case 'A': /* restore all */
                         {
-                            String filename;
+                            string filename;
                             cin >> filename;
                             ifstream file(filename.c_str());
                             if (!file)
@@ -334,9 +333,9 @@ int main()
                             }
                             int num;
                             file >> num;
-                            Ordered_list<Collection*, Less_than_ptr<Collection*>> new_catalog;
-                            Ordered_list<Record*, Less_than_ptr<Record*>> new_library_title;
-                            Ordered_list<Record*, record_id_comp> new_library_id;
+                            vector<Collection*, Less_than_ptr<Collection*>> new_catalog;
+                            vector<Record*, Less_than_ptr<Record*>> new_library_title;
+                            vector<Record*, record_id_comp> new_library_id;
                             try
                             {
                                 Record::save_ID_counter();
@@ -412,7 +411,7 @@ int main()
             cout << e.msg << "\n";
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        } catch (String_exception& e)
+        } catch (string_exception& e)
         {
             cerr << e.msg << "\n";
             return 1;
@@ -425,14 +424,14 @@ void throw_unrecognized_command()
     throw Error("Unrecognized command!");
 }
 
-Record* read_title_get_record(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title)
+Record* read_title_get_record(vector<Record*, Less_than_ptr<Record*>>& library_title)
 {
     return *read_title_get_iter(library_title);
 }
 
-Ordered_list<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title)
+vector<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(vector<Record*, Less_than_ptr<Record*>>& library_title)
 {
-    String title = title_read(cin);
+    string title = title_read(cin);
     Record temp_record(title);
     auto record_iter = library_title.find(&temp_record);
     if (record_iter == library_title.end())
@@ -442,12 +441,12 @@ Ordered_list<Record*, Less_than_ptr<Record*>>::Iterator read_title_get_iter(Orde
     return record_iter;
 }
 
-Record* read_id_get_record(Ordered_list<Record*, record_id_comp>& library_id)
+Record* read_id_get_record(vector<Record*, record_id_comp>& library_id)
 {
     return *read_id_get_iter(library_id);
 }
 
-Ordered_list<Record*, record_id_comp>::Iterator read_id_get_iter(Ordered_list<Record*, record_id_comp>& library_id)
+vector<Record*, record_id_comp>::Iterator read_id_get_iter(vector<Record*, record_id_comp>& library_id)
 {
     int id = integer_read();
     Record temp_record(id);
@@ -459,14 +458,14 @@ Ordered_list<Record*, record_id_comp>::Iterator read_id_get_iter(Ordered_list<Re
     return record_iter;
 }
 
-Collection* read_name_get_collection(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog)
+Collection* read_name_get_collection(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
 {
     return *read_name_get_iter(catalog);
 }
 
-Ordered_list<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog)
+vector<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_iter(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
 {
-    String name;
+    string name;
     cin >> name;
     Collection temp_collection(name);
     auto collection_iter = catalog.find(&temp_collection);
@@ -477,7 +476,7 @@ Ordered_list<Collection*, Less_than_ptr<Collection*>>::Iterator read_name_get_it
     return collection_iter;
 }
 
-void clear_libraries(Ordered_list<Record*, Less_than_ptr<Record*>>& library_title, Ordered_list<Record*, record_id_comp>& library_id)
+void clear_libraries(vector<Record*, Less_than_ptr<Record*>>& library_title, vector<Record*, record_id_comp>& library_id)
 {
     auto title_iter = library_title.begin();
     while (title_iter != library_title.end())
@@ -489,7 +488,7 @@ void clear_libraries(Ordered_list<Record*, Less_than_ptr<Record*>>& library_titl
     library_id.clear();
 }
 
-void clear_catalog(Ordered_list<Collection*, Less_than_ptr<Collection*>>& catalog)
+void clear_catalog(vector<Collection*, Less_than_ptr<Collection*>>& catalog)
 {
     auto catalog_iter = catalog.begin();
     while (catalog_iter != catalog.end())
@@ -520,9 +519,9 @@ void print_collection(Collection* collection)
     cout << "\n" << *collection;
 }
 
-String title_read(istream &is)
+string title_read(istream &is)
 {
-    String title;
+    string title;
     getline(is, title);
     title = parse_title(title);
     if (title.size() == 0)
@@ -532,9 +531,9 @@ String title_read(istream &is)
     return title;
 }
 
-String parse_title(String& title_string)
+string parse_title(string& title_string)
 {
-    String title(title_string);
+    string title(title_string);
     for (int i = 0; i < title.size(); i++)
     {
         if (!isspace(title[i]))

@@ -1,13 +1,12 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include "p2_globals.h"
-#include "String.h"
 #include <fstream>
 #include <ostream>
+#include <string>
 
 /*
-A Record contains a unique ID number, a rating, and a title and medium name as Strings.
+A Record contains a unique ID number, a rating, and a title and medium name as std::strings.
 When created, a Record is assigned a unique ID number. The first Record created
 has ID number == 1.
 */
@@ -17,21 +16,21 @@ class Record {
 public:
     // Create a Record object, giving it a unique ID number by first incrementing
     // a static member variable then using its value as the ID number. The rating is set to 0.
-    Record(const String &medium_, const String &title_);
+    Record(const std::string &medium_, const std::string &title_);
 
     // Create a Record object suitable for use as a probe containing the supplied
-    // title. The ID and rating are set to 0, and the medium is an empty String.
-    Record(const String &title_);
+    // title. The ID and rating are set to 0, and the medium is an empty std::string.
+    Record(const std::string &title_);
 
     // Create a Record object suitable for use as a probe containing the supplied
     // ID number - the static member variable is not modified.
-    // The rating is set to 0, and the medium and title are empty Strings.
+    // The rating is set to 0, and the medium and title are empty std::strings.
     Record(int ID_);
 
     // Construct a Record object from a file stream in save format.
     // Throw Error exception if invalid data discovered in file.
     // No check made for whether the Record already exists or not.
-    // Input string data is read directly into the member variables.
+    // Input std::string data is read directly into the member variables.
     // The record number will be set from the saved data.
     // The static member variable used for new ID numbers will be set to the saved
     // record ID if the saved record ID is larger than the static member variable value.
@@ -46,7 +45,7 @@ public:
     // Accessors
     int get_ID() const { return ID; }
 
-    String get_title() const { return title; }
+    std::string get_title() const { return title; }
 
     // reset the ID counter
     static void reset_ID_counter() { ID_counter = 0; }
@@ -72,8 +71,8 @@ public:
 private:
     static int ID_counter; // must be initialized to zero.
     static int ID_backup;
-    String title;
-    String medium;
+    std::string title;
+    std::string medium;
     int ID;
     int rating;
 };

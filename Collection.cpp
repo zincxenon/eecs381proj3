@@ -1,29 +1,30 @@
 #include <fstream>
 #include <limits>
-#include "p2_globals.h"
 #include "Utility.h"
 #include "Record.h"
 #include "Collection.h"
-#include "Ordered_list.h"
-#include "String.h"
+#include <string>
+#include <vector>
+
+using namespace std
 
 /* Construct a Collection from an input file stream in save format, using the record list,
     restoring all the Record information.
     Record list is needed to resolve references to record members.
     No check made for whether the Collection already exists or not.
     Throw Error exception if invalid data discovered in file.
-    String data input is read directly into the member variable. */
-Collection::Collection(std::ifstream& is, const Ordered_list<Record*, Less_than_ptr<Record*>>& library)
+    string data input is read directly into the member variable. */
+Collection::Collection(ifstream& is, const vector<Record*, Less_than_ptr<Record*>>& library)
 {
     int num;
     if (!(is >> name >> num))
     {
         throw_file_error();
     }
+    is.ignore(numeric_limits<streamsize>::max(), '\n');
     for (int i = 0; i < num; i++)
     {
-        is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        String title;
+        string title;
         getline(is, title);
         Record temp_record(title);
         auto record_it = library.find(&temp_record);
@@ -61,7 +62,7 @@ void Collection::remove_member(Record* record_ptr)
 }
 
 // Write a Collection's data to a stream in save format, with endl as specified.
-void Collection::save(std::ostream& os) const
+void Collection::save(ostream& os) const
 {
     os << name << " " << elements.size();
     for (auto it = elements.begin(); it != elements.end(); ++it)
@@ -72,7 +73,7 @@ void Collection::save(std::ostream& os) const
 }
 
 // Print the Collection data
-std::ostream& operator<< (std::ostream& os, const Collection& collection)
+ostream& operator<< (ostream& os, const Collection& collection)
 {
     os << "Collection " << collection.name << " contains:";
     if (collection.empty())
