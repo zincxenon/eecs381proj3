@@ -4,9 +4,17 @@
 #include "Record.h"
 #include "Collection.h"
 #include <string>
-#include <vector>
+#include <set>
+#include <algorithm>
 
-using namespace std
+using namespace std;
+
+//Construct a collection consisting of all the elements in the two collections
+Collection::Collection(const string& name_, const Collection& a, const Collection& b)
+{
+    name = name_;
+    merge(a.elements.begin(), a.elements.end(), b.elements.begin(), b.elements.end(), elements.begin());
+}
 
 /* Construct a Collection from an input file stream in save format, using the record list,
     restoring all the Record information.
@@ -19,7 +27,7 @@ Collection::Collection(ifstream& is, const vector<Record*, Less_than_ptr<Record*
     int num;
     if (!(is >> name >> num))
     {
-        throw_file_error();
+        throw Error(FILE_ERROR_MSG);
     }
     is.ignore(numeric_limits<streamsize>::max(), '\n');
     for (int i = 0; i < num; i++)
@@ -30,7 +38,7 @@ Collection::Collection(ifstream& is, const vector<Record*, Less_than_ptr<Record*
         auto record_it = library.find(&temp_record);
         if (record_it == library.end())
         {
-            throw_file_error();
+            throw Error(FILE_ERROR_MSG);
         }
         elements.insert(*record_it);
     }
@@ -64,12 +72,9 @@ void Collection::remove_member(Record* record_ptr)
 // Write a Collection's data to a stream in save format, with endl as specified.
 void Collection::save(ostream& os) const
 {
-    os << name << " " << elements.size();
-    for (auto it = elements.begin(); it != elements.end(); ++it)
-    {
-        os << "\n" << (*it)->get_title();
-    }
-    os << "\n";
+    os << name << " " << elements.size() << "\n";
+    ostream_iterator<Record*> out_it(os, "\n");
+    copy(elements.begin(), elements.end(), out_it);
 }
 
 // Print the Collection data
@@ -82,10 +87,9 @@ ostream& operator<< (ostream& os, const Collection& collection)
     }
     else
     {
-        for (auto it = collection.elements.begin(); it != collection.elements.end(); ++it)
-        {
-            os << "\n" << *(*it);
-        }
+        cout << "\n";
+        ostream_iterator<Record*> out_it(os, "\n");
+        copy(elements.begin(), elements.end(), out_it);
     }
     return os;
 }

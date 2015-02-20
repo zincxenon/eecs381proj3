@@ -47,6 +47,8 @@ public:
 
     std::string get_title() const { return title; }
 
+    int get_rating() const { return rating; }
+
     // reset the ID counter
     static void reset_ID_counter() { ID_counter = 0; }
 
@@ -59,6 +61,9 @@ public:
     // if the rating is not between 1 and 5 inclusive, an exception is thrown
     void set_rating(int rating_);
 
+    // changes the title of a Record
+    void Record::set_title(string title_);
+
     // Write a Record's data to a stream in save format with final endl.
     // The record number is saved.
     void save(std::ostream &os) const;
@@ -66,7 +71,9 @@ public:
     // This operator defines the order relation between Records, based just on the last title
     bool operator<(const Record &rhs) const { return title < rhs.title; }
 
-    bool operator==(const Record &rhs) const;
+    bool operator==(const Record &rhs) const {return title == rhs.title || ID == rhs.ID; }
+
+    bool operator!=(const Record &rhs) const {return !(*this == rhs); }
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
 
@@ -84,5 +91,8 @@ private:
 // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
 // If the rating is zero, a 'u' is printed instead of the rating.
 std::ostream& operator<< (std::ostream& os, const Record& record);
+
+// Prints a Record pointer's data to the stream without a final endl
+std::ostream& operator<< (std::ostream& os, const Record* record);
 
 #endif

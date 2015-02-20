@@ -6,7 +6,7 @@
 #include "Utility.h"
 #include "Record.h"
 #include <string>
-#include <vector>
+#include <set>
 
 /* Collections contain a name and a container of members,
 represented as pointers to Records.
@@ -20,6 +20,9 @@ public:
 	// Construct a collection with the specified name and no members
 	Collection(const std::string& name_)
         { name = name_; }
+
+	//Construct a collection consisting of all the elements in the two collections
+	Collection(const std::string& name_, const Collection& a, const Collection& b);
 	
 	/* Construct a Collection from an input file stream in save format, using the record list,
 	restoring all the Record information.
@@ -32,6 +35,9 @@ public:
 	// Accessors
 	std::string get_name() const
 		{return name;}
+
+	const std::set<Record*, Less_than_ptr<Record*>> get_elements() const
+		{return elements;}
 		
 	// Add the Record, throw exception if there is already a Record with the same title.
 	void add_member(Record* record_ptr);
@@ -52,11 +58,15 @@ public:
 	// This operator defines the order relation between Collections, based just on the name
 	bool operator< (const Collection& rhs) const
 		{ return name < rhs.get_name(); }
+
+	bool operator==(const Collection &rhs) const {return name == rhs.get_name(); }
+
+	bool operator!=(const Collection &rhs) const {return !(*this == rhs); }
 	
 	friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
 		
 private:
-    std::vector<Record*> elements;
+    std::set<Record*, Less_than_ptr<Record*>> elements;
 	std::string name;
 
     void print_record_title(Record* record, std::ostream& os);

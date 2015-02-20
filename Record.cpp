@@ -48,11 +48,11 @@ Record::Record(int ID_)
 // The record number will be set from the saved data.
 // The static member variable used for new ID numbers will be set to the saved
 // record ID if the saved record ID is larger than the static member variable value.
-Record::Record(std::ifstream &is)
+Record::Record(ifstream &is)
 {
     if (!(is >> ID >> medium >> rating))
     {
-        throw_file_error();
+        throw Error(FILE_ERROR_MSG);
     }
     if (ID > ID_counter)
     {
@@ -60,7 +60,7 @@ Record::Record(std::ifstream &is)
     }
     if (!(is.get()))
     {
-        throw_file_error();
+        throw Error(FILE_ERROR_MSG);
     }
     getline(is, title);
 }
@@ -75,26 +75,34 @@ void Record::set_rating(int rating_)
     rating = rating_;
 }
 
-// Write a Record's data to a stream in save format with final endl.
-// The record number is saved.
-void Record::save(std::ostream &os) const
+// changes the title of a Record
+void Record::set_title(string title_)
 {
-    os << ID << " " << medium << " " << rating << " " << title << "\n";
+    title = title_;
 }
 
-bool Record::operator==(const Record &rhs) const
+// Write a Record's data to a stream in save format with final endl.
+// The record number is saved.
+void Record::save(ostream &os) const
 {
-    return title == rhs.title || ID == rhs.ID;
+    os << ID << " " << medium << " " << rating << " " << title << "\n";
 }
 
 // Print a Record's data to the stream without a final endl.
 // Output order is ID number followed by a ':' then medium, rating, title, separated by one space.
 // If the rating is zero, a 'u' is printed instead of the rating.
-std::ostream& operator<< (std::ostream& os, const Record& record)
+ostream& operator<< (ostream& os, const Record& record)
 {
     os << record.ID << ": " << record.medium << " ";
     if (record.rating == 0) os << 'u';
     else os << record.rating;
     os << " " << record.title;
+    return os;
+}
+
+// Prints a Record pointer's data to the stream without a final endl
+ostream& operator<< (ostream& os, const Record* record)
+{
+    os << *record;
     return os;
 }
