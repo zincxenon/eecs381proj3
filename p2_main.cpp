@@ -142,7 +142,7 @@ int main()
             {
                 throw Error("Unrecognized command!");
             }
-            if (function_map[action + object](lib_cat))
+            if (function_map["" + action + object](lib_cat))
             {
                 return 0;
             }
