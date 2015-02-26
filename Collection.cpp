@@ -11,12 +11,6 @@
 
 using namespace std;
 
-Collection& operator+=(const Collection &rhs)
-{
-    for_each(rhs.elements.begin(), rhs.elements.end(), [](Record* record) { if (!is_member_present(record)) { add_member(record); }});
-    return *this;
-}
-
 /* Construct a Collection from an input file stream in save format, using the record list,
     restoring all the Record information.
     Record list is needed to resolve references to record members.
@@ -76,6 +70,13 @@ void Collection::save(ostream& os) const
     os << name << " " << elements.size() << "\n";
     ostream_iterator<Record*> out_it(os, "\n");
     copy(elements.begin(), elements.end(), out_it);
+}
+
+// Set union of the records in rhs and this
+Collection& operator+=(const Collection &rhs)
+{
+    for_each(rhs.elements.begin(), rhs.elements.end(), [](Record* record) { if (!is_member_present(record)) { add_member(record); }});
+    return *this;
 }
 
 // Print the Collection data

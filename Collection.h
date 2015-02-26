@@ -22,9 +22,6 @@ public:
 
 	// Construct a collection with the given name and the same elements as those in original
 	Collection::Collection(const string& name_, const Collection& original) : name{name_}, elements(original.elements) {}
-
-	// Set union of the items in rhs and this
-	Collection& operator+=(const Collection &rhs);
 	
 	/* Construct a Collection from an input file stream in save format, using the record list,
 	restoring all the Record information.
@@ -56,6 +53,9 @@ public:
 
 	// Write a Collections's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;
+
+	// Set union of the records in rhs and this
+	Collection& operator+=(const Collection &rhs);
 
 	// This operator defines the order relation between Collections, based just on the name
 	bool operator< (const Collection& rhs) const

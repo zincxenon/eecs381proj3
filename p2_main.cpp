@@ -43,7 +43,7 @@ vector<Collection>::Iterator read_name_get_iter(data_container& lib_cat);
 bool check_title_in_library(data_container& lib_cat, string title);
 
 Record* insert_record(data_container& lib_cat, Record* record);
-Collection& insert_collection(data_container& lib_cat, Collection& collection);
+void insert_collection(data_container& lib_cat, Collection&& collection);
 
 void clear_library_data(data_container& lib_cat);
 
@@ -149,7 +149,7 @@ int main()
         } catch (Error& e) {
             cout << e.msg << "\n";
             cin.clear();
-            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         } catch (ErrorNoClear& e)
         {
             cout << e.msg << "\n";
@@ -224,15 +224,14 @@ Record* insert_record(data_container& lib_cat, Record* record)
     return record;
 }
 
-Collection& insert_collection(data_container& lib_cat, Collection& collection)
+void insert_collection(data_container& lib_cat, Collection&& collection)
 {
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
     if (collection_iter != lib_cat.catalog.end())
     {
         throw Error("Catalog already has a collection with this name!");
     }
-    lib_cat.catalog.insert(collection_iter, std::move(collection));
-    return collection;
+    lib_cat.catalog.insert(collection_iter, move(collection));
 }
 
 void clear_library_data(data_container& lib_cat)
@@ -488,8 +487,7 @@ bool add_collection(data_container& lib_cat)
 {
     string name;
     cin >> name;
-    Collection collection(name);
-    insert_collection(lib_cat, collection);
+    insert_collection(lib_cat, Collection(name));
     cout << "Collection " << name << " added\n";
     return false;
 }
@@ -577,7 +575,7 @@ bool save_all(data_container& lib_cat)
         record->save(file);
     }
     file << lib_cat.catalog.size() << "\n";
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&file](Collection collection){collection.save(file);});
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&file](Collection collection) { collection.save(file); });
     cout << "Data saved\n";
     return false;
 }
@@ -592,23 +590,25 @@ bool restore_all(data_container& lib_cat)
         throw Error(FILE_OPEN_FAIL_MSG);
     }
     int num;
-    file >> num;
+    if (!(file >> num))
+    {
+        throw Error(FILE_ERROR_MSG);
+    }
     data_container new_lib_cat
     try
     {
         Record::save_ID_counter();
         Record::reset_ID_counter();
-        while (num > 0)
+        for (int i = 0; i < num; i++)
         {
             insert_record(new_lib_cat, new Record(file));
-            num--;
         }
         if (!(file >> num))
         {
             throw Error(FILE_ERROR_MSG);
 
         }
-        while (num > 0)
+        for (int i = 0; i < num; i++)
         {
             insert_collection(new_lib_cat, Collection(file, lib_cat.library_title));
             num--;
