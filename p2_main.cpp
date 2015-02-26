@@ -31,7 +31,7 @@ struct data_container {
 
 typedef bool (*data_container_func)(data_container&);
 
-struct record_id_comp {
+static struct record_id_comp {
     bool operator() (const Record *lhs, const Record *rhs) const { return lhs->get_ID() < rhs->get_ID(); }
 };
 
