@@ -400,7 +400,7 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), process_record);
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), [](Record* record) { process_record(record); });
     }
     void process_record(Record* record)
     {
@@ -458,7 +458,7 @@ bool modify_rating(data_container& lib_cat)
 }
 void reorder_record_in_catalog(Collection& collection, string old_title, Record* record)
 {
-    if (collection.is_member_present(old_title))
+    if (collection.is_member_present(&Record(old_title)))
     {
         collection.remove_member(old_title);
         collection.add_member(record);
