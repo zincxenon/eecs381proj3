@@ -169,7 +169,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
 {
     string title = title_read(cin);
     Record temp_record(title);
-    auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
+    auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
     if (**record_iter != temp_record || record_iter == lib_cat.library_title.end())
     {
         throw Error("No record with that title!");
@@ -181,7 +181,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     Record temp_record(id);
-    auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record);
+    auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
     if (**record_iter != temp_record || record_iter == lib_cat.library_id.end())
     {
         throw Error("No record with that ID!");
@@ -205,7 +205,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
 void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
-    auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
+    auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
     if (**title_check == temp_record)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
@@ -216,8 +216,8 @@ Record* insert_record(data_container& lib_cat, Record* record)
 {
     try
     {
-        lib_cat.library_title.insert(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>), record);
-        lib_cat.library_id.insert(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp), record);
+        lib_cat.library_title.insert(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>()), record);
+        lib_cat.library_id.insert(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp()), record);
     } catch (...)
     {
         delete record;
@@ -334,17 +334,12 @@ bool find_string(data_container& lib_cat)
     return false;
 }
 
-bool rating_sort(const Record* a, const Record* b)
-{
-    if (a->get_rating() == b->get_rating())
-        return a < b;
-    else return a->get_rating() > b->get_rating();
-}
 bool list_ratings(data_container& lib_cat)
 {
     data_container temp_lib_cat;
     copy(lib_cat.library_title.begin(), lib_cat.library_title.end(), temp_lib_cat.library_title.begin());
-    sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), rating_sort);
+    sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), [](const Record* a, const Record* b)
+        { return a->get_rating() == b->get_rating() ? a < b : a->get_rating() > b->get_rating(); });
     print_library(temp_lib_cat);
     return false;
 }
@@ -476,7 +471,7 @@ bool modify_title(data_container& lib_cat)
 
     lib_cat.library_id.erase(record_iter);
     assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>));
-    lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>));
+    lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
 
     string old_title = record_ptr->get_title();
     record_ptr->set_title(title);
@@ -524,7 +519,7 @@ bool delete_record(data_container& lib_cat)
     Record *record_ptr = *record_iter;
     lib_cat.library_title.erase(record_iter);
     assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp));
-    lib_cat.library_id.erase(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp));
+    lib_cat.library_id.erase(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
     cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
     delete record_ptr;
     return false;
