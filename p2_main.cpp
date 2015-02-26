@@ -416,19 +416,19 @@ public:
 };
 bool collection_statistics(data_container& lib_cat)
 {
-    Collection_stats collection_stats;
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection_stats);
+    Collection_stats stats_helper;
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), stats_helper);
 
     int lib_size = lib_cat.library_title.size();
-    cout << collection_stats.at_least_one << " out of " << lib_size << " Records appear in at least one Collection\n";
-    cout << collection_stats.many << " out of " << lib_size << " Records appear in more than one Collection\n";
-    cout << "Collections contain a total of " << collection_stats.all << " Records\n";
+    cout << stats_helper.at_least_one << " out of " << lib_size << " Records appear in at least one Collection\n";
+    cout << stats_helper.many << " out of " << lib_size << " Records appear in more than one Collection\n";
+    cout << "Collections contain a total of " << stats_helper.all << " Records\n";
     return false;
 }
 bool combine_collections(data_container& lib_cat)
 {
-    Collection first = read_name_get_iter(lib_cat);
-    Collection second = read_name_get_iter(lib_cat);
+    Collection first = *read_name_get_iter(lib_cat);
+    Collection second = *read_name_get_iter(lib_cat);
     string new_name;
     cin >> new_name;
     Collection result(new_name, first);
