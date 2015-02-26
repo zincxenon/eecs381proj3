@@ -36,9 +36,9 @@ struct record_id_comp {
 
 /* lib cat helper functions dec */
 
-vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat);
-vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat);
-vector<Collection>::Iterator read_name_get_iter(data_container& lib_cat);
+vector<Record*>::iterator read_title_get_iter(data_container& lib_cat);
+vector<Record*>::iterator read_id_get_iter(data_container& lib_cat);
+vector<Collection>::iterator read_name_get_iter(data_container& lib_cat);
 
 bool check_title_in_library(data_container& lib_cat, string title);
 
@@ -163,7 +163,7 @@ int main()
 
 /* lib cat helper functions impl */
 
-vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat)
+vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
 {
     string title = title_read(cin);
     Record temp_record(title);
@@ -175,7 +175,7 @@ vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat)
     return record_iter;
 }
 
-vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat)
+vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     Record temp_record(id);
@@ -187,7 +187,7 @@ vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat)
     return record_iter;
 }
 
-vector<Collection>::Iterator read_name_get_iter(data_container& lib_cat)
+vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
 {
     string name;
     cin >> name;
