@@ -470,7 +470,7 @@ bool modify_title(data_container& lib_cat)
     check_title_in_library(lib_cat, title);
 
     lib_cat.library_id.erase(record_iter);
-    assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>));
+    assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
     lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
 
     string old_title = record_ptr->get_title();
@@ -512,7 +512,7 @@ bool add_member(data_container& lib_cat)
 bool delete_record(data_container& lib_cat)
 {
     auto record_iter = read_title_get_iter(lib_cat);
-    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::is_member_present, placeholders::_1, *record_iter)) != lib_cat.catalog.end())
+    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::is_member_present, placeholders::_1, *record_iter)) != lib_cat.catalog.end())
     {
         throw Error("Cannot delete a record that is a member of a collection!");
     }
@@ -583,7 +583,7 @@ bool save_all(data_container& lib_cat)
         record->save(file);
     }
     file << lib_cat.catalog.size() << "\n";
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::save, placeholders::_1, file));
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::save, placeholders::_1, file));
     cout << "Data saved\n";
     return false;
 }
