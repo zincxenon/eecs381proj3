@@ -62,7 +62,7 @@ public:
     void set_rating(int rating_);
 
     // changes the title of a Record
-    void set_title(string title_);
+    void set_title(std::string title_);
 
     // Write a Record's data to a stream in save format with final endl.
     // The record number is saved.

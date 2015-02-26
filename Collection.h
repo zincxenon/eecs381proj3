@@ -21,7 +21,7 @@ public:
 	Collection(const std::string& name_) : name{name_} {}
 
 	// Construct a collection with the given name and the same elements as those in original
-	Collection::Collection(const string& name_, const Collection& original) : name{name_}, elements(original.elements) {}
+	Collection(const std::string& name_, const Collection& original) : name{name_}, elements(original.elements) {}
 	
 	/* Construct a Collection from an input file stream in save format, using the record list,
 	restoring all the Record information.
@@ -29,7 +29,7 @@ public:
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
 	std::string data input is read directly into the member variable. */
-    Collection(std::ifstream& is, const vector<Record*>& library);
+    Collection(std::ifstream& is, const std::vector<Record*>& library);
 
 	// Accessors
 	std::string get_name() const
@@ -68,8 +68,8 @@ public:
 	friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
 		
 private:
-    std::set<Record*, Less_than_ptr<Record*>> elements;
 	std::string name;
+    std::set<Record*, Less_than_ptr<Record*>> elements;
 
     void print_record_title(Record* record, std::ostream& os);
 };
