@@ -5,9 +5,10 @@
 #include <cctype>
 #include <string>
 #include <algorithm>
+#include <functional>
+#include <iterator>
 
 #include <vector>
-#include <set>
 #include <map>
 #include <list>
 
