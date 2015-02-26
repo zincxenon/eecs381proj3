@@ -518,7 +518,7 @@ bool delete_record(data_container& lib_cat)
     }
     Record *record_ptr = *record_iter;
     lib_cat.library_title.erase(record_iter);
-    assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp));
+    assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
     lib_cat.library_id.erase(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
     cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
     delete record_ptr;
