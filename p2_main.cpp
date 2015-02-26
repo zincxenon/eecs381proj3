@@ -23,7 +23,7 @@ const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
 /* data types */
 
 struct data_container {
-    set<Collection> catalog;
+    vector<Collection> catalog;
     vector<Record*> library_title;
     vector<Record*> library_id;
 };
