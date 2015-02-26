@@ -12,7 +12,7 @@ default: $(PROG)
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
 
-p2_main.o: p2_main.cpp Record.h Collection.hUtility.h
+p2_main.o: p2_main.cpp Record.h Collection.h Utility.h
 	$(CC) $(CFLAGS) p2_main.cpp
 
 Record.o: Record.cpp Record.h Utility.h
