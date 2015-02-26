@@ -138,7 +138,7 @@ int main()
         {
             char action, object;
             cout << "\nEnter command: ";
-            if (!(cin >> action >> object) || function_map.find(action + object) == function_map.end())
+            if (!(cin >> action >> object) || function_map.find("" + action + object) == function_map.end())
             {
                 throw Error("Unrecognized command!");
             }
