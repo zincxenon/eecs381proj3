@@ -170,7 +170,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     string title = title_read(cin);
     Record temp_record(title);
     auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (**record_iter != temp_record || record_iter == lib_cat.library_title.end())
+    if (record_iter == lib_cat.library_title.end() || **record_iter != temp_record)
     {
         throw Error("No record with that title!");
     }
@@ -182,7 +182,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     int id = integer_read();
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
-    if (**record_iter != temp_record || record_iter == lib_cat.library_id.end())
+    if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
     {
         throw Error("No record with that ID!");
     }
@@ -195,7 +195,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     cin >> name;
     Collection temp_collection(name);
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), temp_collection);
-    if (*collection_iter != temp_collection || collection_iter == lib_cat.catalog.end())
+    if (collection_iter == lib_cat.catalog.end() || *collection_iter != temp_collection)
     {
         throw Error("No collection with that name!");
     }
@@ -206,7 +206,7 @@ void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (**title_check == temp_record)
+    if (title_check != lib_cat.library_title.end() && **title_check == temp_record)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
     }
@@ -469,6 +469,10 @@ bool modify_title(data_container& lib_cat)
     string title = title_read(cin);
     check_title_in_library(lib_cat, title);
 
+    list<Collection*> collections_with_record;
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&collections_with_record, record_ptr](Collection& collection)
+        { if (collection.is_member_present(record_ptr)) { collection.remove_member(record_ptr); collections_with_record.push_back(&collection); }});
+
     lib_cat.library_id.erase(record_iter);
     assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
     lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
@@ -477,7 +481,8 @@ bool modify_title(data_container& lib_cat)
     record_ptr->set_title(title);
     insert_record(lib_cat, record_ptr);
 
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(reorder_record_in_catalog, placeholders::_1, old_title, record_ptr));
+    for_each(collections_with_record.begin(), collections_with_record.end(), [record_ptr](Collection* collection) { collection->add_member(record_ptr); });
+
     cout << "Title for record " << record_ptr->get_ID() << " changed to " << title << "\n";
     return false;
 }

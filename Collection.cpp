@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <algorithm>
 
 #include "Utility.h"
 #include "Record.h"
@@ -32,8 +33,8 @@ Collection::Collection(ifstream& is, const vector<Record*>& library)
         string title;
         getline(is, title);
         Record temp_record(title);
-        auto record_it = library.find(&temp_record);
-        if (record_it == library.end())
+        auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Less_than_ptr<Record*>());
+        if (record_it == library.end() || **record_it != temp_record)
         {
             throw Error(FILE_ERROR_MSG);
         }
