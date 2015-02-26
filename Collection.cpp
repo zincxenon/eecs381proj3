@@ -78,7 +78,7 @@ void Collection::save(ostream& os) const
 // Set union of the records in rhs and this
 Collection& Collection::operator+=(const Collection &rhs)
 {
-    for_each(rhs.elements.begin(), rhs.elements.end(), [](Record* record) { if (!is_member_present(record)) { add_member(record); }});
+    for_each(rhs.elements.begin(), rhs.elements.end(), [this](Record* record) { if (!is_member_present(record)) { add_member(record); }});
     return *this;
 }
 
@@ -94,7 +94,7 @@ ostream& operator<< (ostream& os, const Collection& collection)
     {
         os << "\n";
         ostream_iterator<Record*> out_it(os, "\n");
-        copy(elements.begin(), elements.end(), out_it);
+        copy(collection.elements.begin(), collection.elements.end(), out_it);
     }
     return os;
 }
