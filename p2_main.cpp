@@ -324,7 +324,7 @@ bool find_string(data_container& lib_cat)
     string key;
     cin >> key;
     list<Record*> records_with_string;
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, records_with_string, placeholders::_1));
+    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, ref(records_with_string), placeholders::_1));
     if (records_with_string.size() == 0)
     {
         throw Error("No records contain that string!");
@@ -583,7 +583,7 @@ bool save_all(data_container& lib_cat)
         record->save(file);
     }
     file << lib_cat.catalog.size() << "\n";
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::save, placeholders::_1, file));
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::save, placeholders::_1, ref(file)));
     cout << "Data saved\n";
     return false;
 }
