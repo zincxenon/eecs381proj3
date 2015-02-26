@@ -343,7 +343,7 @@ bool list_ratings(data_container& lib_cat)
 {
     data_container temp_lib_cat;
     copy(lib_cat.library_title.begin(), lib_cat.library_title.end(), temp_lib_cat.library_title.begin());
-    sort(temp_lib_cat.library_title.begin, temp_lib_cat.library_title.end(), rating_sort);
+    sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), rating_sort);
     print_library(temp_lib_cat);
     return false;
 }
@@ -445,6 +445,7 @@ bool combine_collections(data_container& lib_cat)
     Collection result(new_name, first);
     result += second;
     cout << "Collections " << first.get_name() << " and " << second.get_name() << " combined into new collection " << new_name << "\n";
+    return false;
 }
 
 bool modify_rating(data_container& lib_cat)
@@ -628,6 +629,7 @@ bool restore_all(data_container& lib_cat)
         clear_library_data(lib_cat);
         lib_cat = new_lib_cat;
         cout << "Data loaded\n";
+        return false;
     }
     catch (Error& e)
     {
@@ -636,11 +638,11 @@ bool restore_all(data_container& lib_cat)
         Record::restore_ID_counter();
         throw Error(FILE_ERROR_MSG);
     }
-    return false;
 }
 
 bool quit(data_container& lib_cat)
 {
     clear_all(lib_cat);
     cout << "Done\n";
+    return true;
 }
