@@ -400,7 +400,7 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [](Record* record) { process_record(record); });
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* record) { process_record(record); });
     }
     void process_record(Record* record)
     {
