@@ -5,7 +5,7 @@
 
 /* Utility functions, constants, and classes used by more than one other modules */
 
-const char * FILE_ERROR_MSG;
+const char * FILE_ERROR_MSG = "Invalid data found in file!";
 
 // a simple class for error exceptions - msg points to a C-string error message
 struct Error {
@@ -21,12 +21,6 @@ struct ErrorNoClear {
 			msg(msg_)
 	{}
 	const char* msg;
-};
-
-// Compare two objects (passed by const&) using T's operator<
-template<typename T>
-struct Less_than_ref {
-    bool operator() (const T& t1, const T& t2) const {return t1 < t2;}
 };
 
 // Compare two pointers (T is a pointer type) using *T's operator<
