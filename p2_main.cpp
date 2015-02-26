@@ -168,7 +168,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     string title = title_read(cin);
     Record temp_record(title);
     auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
-    if (*record_iter != temp_record || record_iter == lib_cat.library_title.end())
+    if (**record_iter != temp_record || record_iter == lib_cat.library_title.end())
     {
         throw Error("No record with that title!");
     }
@@ -180,7 +180,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     int id = integer_read();
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record);
-    if (*record_iter != temp_record || record_iter == lib_cat.library_id.end())
+    if (**record_iter != temp_record || record_iter == lib_cat.library_id.end())
     {
         throw Error("No record with that ID!");
     }
