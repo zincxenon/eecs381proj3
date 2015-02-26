@@ -204,7 +204,7 @@ bool check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
-    if (title_check != lib_cat.library_title.end())
+    if (*title_check == temp_record)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
     }
@@ -227,7 +227,7 @@ Record* insert_record(data_container& lib_cat, Record* record)
 void insert_collection(data_container& lib_cat, Collection&& collection)
 {
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
-    if (collection_iter != lib_cat.catalog.end())
+    if (*collection_iter == collection)
     {
         throw Error("Catalog already has a collection with this name!");
     }
@@ -236,7 +236,7 @@ void insert_collection(data_container& lib_cat, Collection&& collection)
 
 void clear_library_data(data_container& lib_cat)
 {
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), [](Record* record){delete record;});
+    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), [](Record* record) { delete record; });
     lib_cat.library_title.clear();
     lib_cat.library_id.clear();
 }
@@ -272,6 +272,15 @@ struct title_parser
             remove_whitespace = true;
         }
     }
+    void finish()
+    {
+        if (isspace(title.back()))
+        {
+            title.pop_back();
+        }
+    }
+    string get_title() { return title; }
+private:
     string title;
     bool remove_whitespace = true;
 };
@@ -279,12 +288,8 @@ string parse_title(string& original)
 {
     title_parser title_helper;
     for_each(original.begin(), original.end(), title_helper);
-    string title = move(title_helper.title);
-    if (isspace(title[title.size() - 1]))
-    {
-        title.pop_back();
-    }
-    return title;
+    title_helper.finish();
+    return title_helper.get_title();
 }
 
 int integer_read()
@@ -394,23 +399,28 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [](Record* record)
-        {
-            if (record_count.find(record->get_ID()) == record_count.end())
-            {
-                record_count[record->get_ID()] = 0;
-            }
-            int& current_count = record_count[record->get_ID()];
-            if (current_count == 0)
-            {
-                ++at_least_one;
-            } else if (current_count == 1)
-            {
-                ++many;
-            }
-            ++all;
-        });
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), process_record);
     }
+    void process_record(Record* record)
+    {
+        if (record_count.find(record->get_ID()) == record_count.end())
+        {
+            record_count[record->get_ID()] = 0;
+        }
+        int& current_count = record_count[record->get_ID()];
+        if (current_count == 0)
+        {
+            ++at_least_one;
+        } else if (current_count == 1)
+        {
+            ++many;
+        }
+        ++all;
+    }
+    int get_one() { return at_least_one; }
+    int get_many() { return many; }
+    int get_all() { return all; }
+private:
     map<int, int> record_count;
     int at_least_one = 0, many = 0, all = 0;
 };
@@ -420,9 +430,9 @@ bool collection_statistics(data_container& lib_cat)
     for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), stats_helper);
 
     int lib_size = lib_cat.library_title.size();
-    cout << stats_helper.at_least_one << " out of " << lib_size << " Records appear in at least one Collection\n";
-    cout << stats_helper.many << " out of " << lib_size << " Records appear in more than one Collection\n";
-    cout << "Collections contain a total of " << stats_helper.all << " Records\n";
+    cout << stats_helper.get_one() << " out of " << lib_size << " Records appear in at least one Collection\n";
+    cout << stats_helper.get_many() << " out of " << lib_size << " Records appear in more than one Collection\n";
+    cout << "Collections contain a total of " << stats_helper.get_all() << " Records\n";
     return false;
 }
 bool combine_collections(data_container& lib_cat)
@@ -503,7 +513,7 @@ bool add_member(data_container& lib_cat)
 bool delete_record(data_container& lib_cat)
 {
     auto record_iter = read_title_get_iter(library_title);
-    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&record_iter](Collection c){return c.is_member_present(*record_iter);}) != lib_cat.catalog.end())
+    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::is_member_present, _1, *record_iter)) != lib_cat.catalog.end())
     {
         throw Error("Cannot delete a record that is a member of a collection!");
     }
