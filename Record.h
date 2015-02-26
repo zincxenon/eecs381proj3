@@ -20,7 +20,7 @@ public:
 
     // Create a Record object suitable for use as a probe containing the supplied
     // title. The ID and rating are set to 0, and the medium is an empty std::string.
-    Record::Record(const std::string &title_) : title{title_}, rating{0}, ID{0} {}
+    Record(const std::string &title_) : title{title_}, ID{0}, rating{0} {}
 
     // Create a Record object suitable for use as a probe containing the supplied
     // ID number - the static member variable is not modified.
@@ -62,7 +62,7 @@ public:
     void set_rating(int rating_);
 
     // changes the title of a Record
-    void Record::set_title(string title_);
+    void set_title(string title_);
 
     // Write a Record's data to a stream in save format with final endl.
     // The record number is saved.
