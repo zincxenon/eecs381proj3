@@ -4,7 +4,9 @@
 #include <limits>
 #include <string>
 #include <set>
+#include <vector>
 #include <algorithm>
+#include <iterator>
 
 #include "Utility.h"
 #include "Record.h"
@@ -17,7 +19,7 @@ using namespace std;
     No check made for whether the Collection already exists or not.
     Throw Error exception if invalid data discovered in file.
     string data input is read directly into the member variable. */
-Collection::Collection(ifstream& is, const vector<Record*, Less_than_ptr<Record*>>& library)
+Collection::Collection(ifstream& is, const vector<Record*>& library)
 {
     int num;
     if (!(is >> name >> num))
@@ -73,7 +75,7 @@ void Collection::save(ostream& os) const
 }
 
 // Set union of the records in rhs and this
-Collection& operator+=(const Collection &rhs)
+Collection& Collection::operator+=(const Collection &rhs)
 {
     for_each(rhs.elements.begin(), rhs.elements.end(), [](Record* record) { if (!is_member_present(record)) { add_member(record); }});
     return *this;
@@ -89,7 +91,7 @@ ostream& operator<< (ostream& os, const Collection& collection)
     }
     else
     {
-        cout << "\n";
+        os << "\n";
         ostream_iterator<Record*> out_it(os, "\n");
         copy(elements.begin(), elements.end(), out_it);
     }

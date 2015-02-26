@@ -7,6 +7,7 @@
 #include "Record.h"
 #include <string>
 #include <set>
+#include <vector>
 
 /* Collections contain a name and a container of members,
 represented as pointers to Records.

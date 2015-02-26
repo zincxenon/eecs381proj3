@@ -17,7 +17,7 @@ int Record::ID_backup = 0;
 
 // Create a Record object, giving it a unique ID number by first incrementing
 // a static member variable then using its value as the ID number. The rating is set to 0.
-Record::Record(const string &medium_, const string &title_) : medium{medium_}, title{title_}, rating{0}
+Record::Record(const string &medium_, const string &title_) : title{title_}, medium{medium_}, rating{0}
 {
     ID = ++ID_counter;
 }
