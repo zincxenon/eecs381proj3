@@ -1,8 +1,6 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <istream>
-
 /* Utility functions, constants, and classes used by more than one other modules */
 
 extern const char * FILE_ERROR_MSG;

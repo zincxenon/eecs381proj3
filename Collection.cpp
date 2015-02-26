@@ -2,15 +2,16 @@
 
 #include <fstream>
 #include <limits>
-#include <string>
-#include <set>
-#include <vector>
 #include <algorithm>
 #include <iterator>
 #include <algorithm>
 
-#include "Utility.h"
+#include <string>
+#include <set>
+#include <vector>
+
 #include "Record.h"
+#include "Utility.h"
 
 using namespace std;
 

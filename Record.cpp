@@ -3,8 +3,9 @@
 #include <fstream>
 #include <iostream>
 #include <cctype>
-#include <string>
 #include <iostream>
+
+#include <string>
 
 #include "Utility.h"
 

@@ -3,12 +3,12 @@
 #include <limits>
 #include <istream>
 #include <cctype>
-#include <string>
 #include <algorithm>
 #include <functional>
 #include <iterator>
 #include <cassert>
 
+#include <string>
 #include <vector>
 #include <map>
 #include <list>

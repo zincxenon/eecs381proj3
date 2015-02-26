@@ -3,11 +3,13 @@
 
 #include <fstream>
 #include <ostream>
-#include "Utility.h"
-#include "Record.h"
+
 #include <string>
 #include <set>
 #include <vector>
+
+#include "Record.h"
+#include "Utility.h"
 
 /* Collections contain a name and a container of members,
 represented as pointers to Records.
