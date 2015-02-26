@@ -5,7 +5,7 @@
 
 /* Utility functions, constants, and classes used by more than one other modules */
 
-const char * FILE_ERROR_MSG = "Invalid data found in file!";
+extern const char * FILE_ERROR_MSG;
 
 // a simple class for error exceptions - msg points to a C-string error message
 struct Error {
