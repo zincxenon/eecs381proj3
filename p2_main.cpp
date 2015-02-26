@@ -583,7 +583,7 @@ bool save_all(data_container& lib_cat)
         record->save(file);
     }
     file << lib_cat.catalog.size() << "\n";
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&file](Collection collection) { collection.save(file); });
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::save, placeholders::_1, file));
     cout << "Data saved\n";
     return false;
 }
