@@ -307,7 +307,7 @@ int integer_read()
 
 bool find_record(data_container& lib_cat)
 {
-    auto record_ptr = *read_title_get_iter(lib_cat.library_title);
+    auto record_ptr = *read_title_get_iter(lib_cat);
     cout << *record_ptr << "\n";
     return false;
 }
@@ -323,7 +323,7 @@ bool find_string(data_container& lib_cat)
     string key;
     cin >> key;
     list<Record*> records_with_string;
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, records_with_string, _1));
+    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, records_with_string, placeholders::_1));
     if (records_with_string.size() == 0)
     {
         throw Error("No records contain that string!");
@@ -350,13 +350,13 @@ bool list_ratings(data_container& lib_cat)
 
 bool print_record(data_container& lib_cat)
 {
-    Record *record_ptr = *read_id_get_iter(lib_cat.library_id);
+    Record *record_ptr = *read_id_get_iter(lib_cat);
     cout << *record_ptr << "\n";
     return false;
 }
 bool print_collection(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat.catalog);
+    Collection collection = *read_name_get_iter(lib_cat);
     cout << collection;
     return false;
 }
@@ -449,7 +449,7 @@ bool combine_collections(data_container& lib_cat)
 
 bool modify_rating(data_container& lib_cat)
 {
-    Record *record_ptr = *read_id_get_iter(lib_cat.library_id);
+    Record *record_ptr = *read_id_get_iter(lib_cat);
     int rating = integer_read();
     record_ptr->set_rating(rating);
     cout << "Rating for record " << record_ptr->get_ID() << " changed to " << rating << "\n";
@@ -465,7 +465,7 @@ void reorder_record_in_catalog(Collection& collection, string old_title, Record*
 }
 bool modify_title(data_container& lib_cat)
 {
-    auto record_iter = read_id_get_iter(lib_cat.library_id);
+    auto record_iter = read_id_get_iter(lib_cat);
     Record *record_ptr = *record_iter;
 
     string title = title_read(cin);
@@ -479,7 +479,7 @@ bool modify_title(data_container& lib_cat)
     record_ptr->set_title(title);
     insert_record(lib_cat, record_ptr);
 
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(reorder_record_in_catalog, _1, old_title, record_ptr));
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(reorder_record_in_catalog, placeholders::_1, old_title, record_ptr));
     cout << "Title for record " << record_ptr->get_ID() << " changed to " << title << "\n";
     return false;
 }
@@ -504,8 +504,8 @@ bool add_collection(data_container& lib_cat)
 }
 bool add_member(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat.catalog);
-    Record *record_ptr = *read_id_get_iter(lib_cat.library_id);
+    Collection collection = *read_name_get_iter(lib_cat);
+    Record *record_ptr = *read_id_get_iter(lib_cat);
     collection.add_member(record_ptr);
     cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " added\n";
     return false;
@@ -513,8 +513,8 @@ bool add_member(data_container& lib_cat)
 
 bool delete_record(data_container& lib_cat)
 {
-    auto record_iter = read_title_get_iter(library_title);
-    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::is_member_present, _1, *record_iter)) != lib_cat.catalog.end())
+    auto record_iter = read_title_get_iter(lib_cat);
+    if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(Collection::is_member_present, placeholders::_1, *record_iter)) != lib_cat.catalog.end())
     {
         throw Error("Cannot delete a record that is a member of a collection!");
     }
@@ -528,7 +528,7 @@ bool delete_record(data_container& lib_cat)
 }
 bool delete_collection(data_container& lib_cat)
 {
-    auto collection_iter = read_name_get_iter(lib_cat.catalog);
+    auto collection_iter = read_name_get_iter(lib_cat);
     Collection collection = *collection_iter;
     lib_cat.catalog.erase(collection_iter);
     cout << "Collection " << collection.get_name() << " deleted\n";
@@ -537,7 +537,7 @@ bool delete_collection(data_container& lib_cat)
 }
 bool delete_member(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat.catalog);
+    Collection collection = *read_name_get_iter(lib_cat);
     Record *record_ptr = *read_id_get_iter(library_id);
     collection.remove_member(record_ptr);
     cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
