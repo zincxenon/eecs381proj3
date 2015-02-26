@@ -4,18 +4,21 @@
 #include <istream>
 #include <cctype>
 #include <string>
+#include <algorithm>
 
 #include <vector>
 #include <set>
 #include <map>
 #include <list>
 
-#include <algorithm>
 #include "Record.h"
 #include "Collection.h"
 #include "Utility.h"
 
 using namespace std;
+
+const char * TITLE_ALREADY_FOUND_MSG = "Library already has a record with this title!";
+const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
 
 /* data types */
 
@@ -34,13 +37,12 @@ struct record_id_comp {
 /* lib cat helper functions dec */
 
 vector<Record*>::Iterator read_title_get_iter(data_container& lib_cat);
-
 vector<Record*>::Iterator read_id_get_iter(data_container& lib_cat);
-
 vector<Collection>::Iterator read_name_get_iter(data_container& lib_cat);
 
-Record* insert_record(data_container& lib_cat, Record* record);
+bool check_title_in_library(data_container& lib_cat, string title);
 
+Record* insert_record(data_container& lib_cat, Record* record);
 Collection& insert_collection(data_container& lib_cat, Collection& collection);
 
 void clear_library_data(data_container& lib_cat);
@@ -198,6 +200,16 @@ vector<Collection>::Iterator read_name_get_iter(data_container& lib_cat)
     return collection_iter;
 }
 
+bool check_title_in_library(data_container& lib_cat, string title)
+{
+    Record temp_record(title);
+    auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
+    if (title_check != lib_cat.library_title.end())
+    {
+        throw Error(TITLE_ALREADY_FOUND_MSG);
+    }
+}
+
 Record* insert_record(data_container& lib_cat, Record* record)
 {
     try
@@ -214,13 +226,12 @@ Record* insert_record(data_container& lib_cat, Record* record)
 
 Collection& insert_collection(data_container& lib_cat, Collection& collection)
 {
-    try
+    auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
+    if (collection_iter != lib_cat.catalog.end())
     {
-        lib_cat.library_title.insert(lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection), collection);
-    } catch (...)
-    {
-        throw;
+        throw Error("Catalog already has a collection with this name!");
     }
+    lib_cat.catalog.insert(collection_iter, std::move(collection));
     return collection;
 }
 
@@ -245,11 +256,9 @@ string title_read(istream &is)
     return title;
 }
 
-string parse_title(string& original)
+struct title_parser
 {
-    string title;
-    bool remove_whitespace = true;
-    for_each(original.begin(), original.end(), [&remove_whitespace, &title](char c)
+    void operator()(char c)
     {
         if (!isspace(c))
         {
@@ -263,7 +272,15 @@ string parse_title(string& original)
             }
             remove_whitespace = true;
         }
-    });
+    }
+    string title;
+    bool remove_whitespace = true;
+};
+string parse_title(string& original)
+{
+    title_parser title_helper;
+    for_each(original.begin(), original.end(), title_helper);
+    string title = move(title_helper.title);
     if (isspace(title[title.size() - 1]))
     {
         title.pop_back();
@@ -289,35 +306,39 @@ bool find_record(data_container& lib_cat)
     cout << *record_ptr << "\n";
     return false;
 }
+void search_record_for_string(string key, list<Record*>& records_with_string, Record* record)
+{
+    if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
+    {
+        records_with_string.push_back(record);
+    }
+}
 bool find_string(data_container& lib_cat)
 {
     string key;
     cin >> key;
     list<Record*> records_with_string;
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), [&key, &records_with_string](Record* record)
+    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, records_with_string, _1));
+    if (records_with_string.size() == 0)
     {
-        if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
-        {
-            records_with_string.push_back(record);
-        }
-    });
+        throw Error("No records contain that string!");
+    }
     ostream_iterator<Record*> out_it(cout, "\n");
     copy(records_with_string.begin(), records_with_string.end(), out_it);
     return false;
 }
 
+bool rating_sort(const Record* a, const Record* b)
+{
+    if (a->get_rating() == b->get_rating())
+        return a < b;
+    else return a->get_rating() > b->get_rating();
+}
 bool list_ratings(data_container& lib_cat)
 {
     data_container temp_lib_cat;
     copy(lib_cat.library_title.begin(), lib_cat.library_title.end(), temp_lib_cat.library_title.begin());
-    sort(temp_lib_cat.library_title.begin, temp_lib_cat.library_title.end(), [](Record* a, Record* b)
-    {
-        if (a->get_rating() == b->get_rating())
-        {
-            return a < b;
-        }
-        return a->get_rating() > b->get_rating();
-    });
+    sort(temp_lib_cat.library_title.begin, temp_lib_cat.library_title.end(), rating_sort);
     print_library(temp_lib_cat);
     return false;
 }
@@ -370,14 +391,11 @@ bool print_allocation(data_container& lib_cat)
     return false;
 }
 
-bool collection_statistics(data_container& lib_cat)
-{
-    // function object here
-    map<int, int> record_count;
-    int at_least_one = 0, many = 0, all = 0;
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&](Collection collection)
+struct Collection_stats {
+public:
+    void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [&](Record* record)
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), [](Record* record)
         {
             if (record_count.find(record->get_ID()) == record_count.end())
             {
@@ -386,17 +404,26 @@ bool collection_statistics(data_container& lib_cat)
             int& current_count = record_count[record->get_ID()];
             if (current_count == 0)
             {
-                at_least_one++;
+                ++at_least_one;
             } else if (current_count == 1)
             {
-                many++;
+                ++many;
             }
-            all++;
+            ++all;
         });
-    });
-    cout << at_least_one << " out of " << lib_cat.library_title.size() << " Records appear in at least one Collection\n";
-    cout << many << " out of " << lib_cat.library_title.size() << " Records appear in more than one Collection\n";
-    cout << "Collections contain a total of " << all << " Records\n";
+    }
+    map<int, int> record_count;
+    int at_least_one = 0, many = 0, all = 0;
+};
+bool collection_statistics(data_container& lib_cat)
+{
+    Collection_stats collection_stats;
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection_stats);
+
+    int lib_size = lib_cat.library_title.size();
+    cout << collection_stats.at_least_one << " out of " << lib_size << " Records appear in at least one Collection\n";
+    cout << collection_stats.many << " out of " << lib_size << " Records appear in more than one Collection\n";
+    cout << "Collections contain a total of " << collection_stats.all << " Records\n";
     return false;
 }
 bool combine_collections(data_container& lib_cat)
@@ -405,7 +432,8 @@ bool combine_collections(data_container& lib_cat)
     Collection second = read_name_get_iter(lib_cat);
     string new_name;
     cin >> new_name;
-    Collection result(new_name, first, second);
+    Collection result(new_name, first);
+    result += second;
     cout << "Collections " << first.get_name() << " and " << second.get_name() << " combined into new collection " << new_name << "\n";
 }
 
@@ -417,16 +445,31 @@ bool modify_rating(data_container& lib_cat)
     cout << "Rating for record " << record_ptr->get_ID() << " changed to " << rating << "\n";
     return false;
 }
+void reorder_record_in_catalog(Collection& collection, string old_title, Record* record)
+{
+    if (collection.is_member_present(old_title))
+    {
+        collection.remove_member(old_title);
+        collection.add_member(record);
+    }
+}
 bool modify_title(data_container& lib_cat)
 {
     auto record_iter = read_id_get_iter(lib_cat.library_id);
     Record *record_ptr = *record_iter;
+
+    string title = title_read(cin);
+    check_title_in_library(lib_cat, title);
+
     lib_cat.library_id.erase(record_iter);
     assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>));
     lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>));
-    string title = title_read(cin);
+
+    string old_title = record_ptr->get_title();
     record_ptr->set_title(title);
     insert_record(lib_cat, record_ptr);
+
+    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(reorder_record_in_catalog, _1, old_title, record_ptr));
     cout << "Title for record " << record_ptr->get_ID() << " changed to " << title << "\n";
     return false;
 }
@@ -436,11 +479,7 @@ bool add_record(data_container& lib_cat)
     string medium, title;
     cin >> medium;
     title = title_read(cin);
-    Record temp_record(title);
-    if (find(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record) != lib_cat.library_title.end())
-    {
-        throw Error("Library already has a record with this title!");
-    }
+    check_title_in_library(lib_cat, title);
     Record *record = insert_record(lib_cat, new Record(medium, title));
     cout << "Record " << record->get_ID() << " added\n";
     return false;
@@ -450,10 +489,6 @@ bool add_collection(data_container& lib_cat)
     string name;
     cin >> name;
     Collection collection(name);
-    if (lib_cat.catalog.find(temp_collection) != lib_cat.catalog.end())
-    {
-        throw Error("Catalog already has a collection with this name!");
-    }
     insert_collection(lib_cat, collection);
     cout << "Collection " << name << " added\n";
     return false;
@@ -533,10 +568,14 @@ bool save_all(data_container& lib_cat)
     ofstream file(filename.c_str());
     if (!file)
     {
-        throw Error("Could not open file!");
+        throw Error(FILE_OPEN_FAIL_MSG);
     }
     file << lib_cat.library_title.size() << "\n";
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), [&file](Record* record){record->save(file);});
+    // the one range for
+    for (auto&& record : lib_cat.library_title)
+    {
+        record->save(file);
+    }
     file << lib_cat.catalog.size() << "\n";
     for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&file](Collection collection){collection.save(file);});
     cout << "Data saved\n";
@@ -550,7 +589,7 @@ bool restore_all(data_container& lib_cat)
     ifstream file(filename.c_str());
     if (!file)
     {
-        throw Error("Could not open file!");
+        throw Error(FILE_OPEN_FAIL_MSG);
     }
     int num;
     file >> num;

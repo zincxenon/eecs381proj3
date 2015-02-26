@@ -1,10 +1,12 @@
+#include "Record.h"
+
 #include <fstream>
 #include <iostream>
 #include <cctype>
-#include "Record.h"
-#include "Utility.h"
 #include <string>
 #include <iostream>
+
+#include "Utility.h"
 
 using namespace std;
 
@@ -15,30 +17,9 @@ int Record::ID_backup = 0;
 
 // Create a Record object, giving it a unique ID number by first incrementing
 // a static member variable then using its value as the ID number. The rating is set to 0.
-Record::Record(const string &medium_, const string &title_)
+Record::Record(const string &medium_, const string &title_) : medium{medium_}, title{title_}, rating{0}
 {
-    title = title_;
-    medium = medium_;
     ID = ++ID_counter;
-    rating = 0;
-}
-
-// Create a Record object suitable for use as a probe containing the supplied
-// title. The ID and rating are set to 0, and the medium is an empty string.
-Record::Record(const string &title_)
-{
-    title = title_;
-    rating = 0;
-    ID = 0;
-}
-
-// Create a Record object suitable for use as a probe containing the supplied
-// ID number - the static member variable is not modified.
-// The rating is set to 0, and the medium and title are empty strings.
-Record::Record(int ID_)
-{
-    ID = ID_;
-    rating = 0;
 }
 
 // Construct a Record object from a file stream in save format.

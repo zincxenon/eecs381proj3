@@ -18,11 +18,13 @@ class Collection {
 
 public:
 	// Construct a collection with the specified name and no members
-	Collection(const std::string& name_)
-        { name = name_; }
+	Collection(const std::string& name_) : name{name_} {}
 
-	//Construct a collection consisting of all the elements in the two collections
-	Collection(const std::string& name_, const Collection& a, const Collection& b);
+	// Construct a collection with the given name and the same elements as those in original
+	Collection::Collection(const string& name_, const Collection& original) : name{name_}, elements(original.elements) {}
+
+	// Set union of the items in rhs and this
+	Collection& operator+=(const Collection &rhs);
 	
 	/* Construct a Collection from an input file stream in save format, using the record list,
 	restoring all the Record information.

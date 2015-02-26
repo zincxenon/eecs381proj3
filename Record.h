@@ -20,12 +20,12 @@ public:
 
     // Create a Record object suitable for use as a probe containing the supplied
     // title. The ID and rating are set to 0, and the medium is an empty std::string.
-    Record(const std::string &title_);
+    Record::Record(const string &title_) : title{title_}, rating{0}, ID{0} {}
 
     // Create a Record object suitable for use as a probe containing the supplied
     // ID number - the static member variable is not modified.
     // The rating is set to 0, and the medium and title are empty std::strings.
-    Record(int ID_);
+    Record(int ID_) : ID{0}, rating{0} {}
 
     // Construct a Record object from a file stream in save format.
     // Throw Error exception if invalid data discovered in file.

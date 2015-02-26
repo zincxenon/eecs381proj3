@@ -1,19 +1,20 @@
+#include "Collection.h"
+
 #include <fstream>
 #include <limits>
-#include "Utility.h"
-#include "Record.h"
-#include "Collection.h"
 #include <string>
 #include <set>
 #include <algorithm>
 
+#include "Utility.h"
+#include "Record.h"
+
 using namespace std;
 
-//Construct a collection consisting of all the elements in the two collections
-Collection::Collection(const string& name_, const Collection& a, const Collection& b)
+Collection& operator+=(const Collection &rhs)
 {
-    name = name_;
-    merge(a.elements.begin(), a.elements.end(), b.elements.begin(), b.elements.end(), elements.begin());
+    for_each(rhs.elements.begin(), rhs.elements.end(), [](Record* record) { if (!is_member_present(record)) { add_member(record); }});
+    return *this;
 }
 
 /* Construct a Collection from an input file stream in save format, using the record list,
