@@ -4,4 +4,4 @@
 
 using namespace std;
 
-const char * FILE_ERROR_MSG = "Invalid data found in file!";
+FILE_ERROR_MSG = "Invalid data found in file!";
