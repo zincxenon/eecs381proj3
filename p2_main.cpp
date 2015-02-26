@@ -204,7 +204,7 @@ bool check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
-    if (*title_check == temp_record)
+    if (**title_check == temp_record)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
     }
