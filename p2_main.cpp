@@ -459,9 +459,10 @@ bool modify_rating(data_container& lib_cat)
 }
 void reorder_record_in_catalog(Collection& collection, string old_title, Record* record)
 {
-    if (collection.is_member_present(&Record(old_title)))
+    Record temp_record(old_title);
+    if (collection.is_member_present(&temp_record))
     {
-        collection.remove_member(old_title);
+        collection.remove_member(&temp_record);
         collection.add_member(record);
     }
 }
