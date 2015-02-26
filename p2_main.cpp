@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <cassert>
 
 #include <vector>
 #include <map>
@@ -41,7 +42,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat);
 vector<Record*>::iterator read_id_get_iter(data_container& lib_cat);
 vector<Collection>::iterator read_name_get_iter(data_container& lib_cat);
 
-bool check_title_in_library(data_container& lib_cat, string title);
+void check_title_in_library(data_container& lib_cat, string title);
 
 Record* insert_record(data_container& lib_cat, Record* record);
 void insert_collection(data_container& lib_cat, Collection&& collection);
@@ -201,7 +202,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     return collection_iter;
 }
 
-bool check_title_in_library(data_container& lib_cat, string title)
+void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record);
@@ -533,13 +534,12 @@ bool delete_collection(data_container& lib_cat)
     Collection collection = *collection_iter;
     lib_cat.catalog.erase(collection_iter);
     cout << "Collection " << collection.get_name() << " deleted\n";
-    delete collection_ptr;
     return false;
 }
 bool delete_member(data_container& lib_cat)
 {
     Collection collection = *read_name_get_iter(lib_cat);
-    Record *record_ptr = *read_id_get_iter(library_id);
+    Record *record_ptr = *read_id_get_iter(lib_cat);
     collection.remove_member(record_ptr);
     cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
     return false;
@@ -606,7 +606,7 @@ bool restore_all(data_container& lib_cat)
     {
         throw Error(FILE_ERROR_MSG);
     }
-    data_container new_lib_cat
+    data_container new_lib_cat;
     try
     {
         Record::save_ID_counter();
@@ -629,7 +629,6 @@ bool restore_all(data_container& lib_cat)
         clear_library_data(lib_cat);
         lib_cat = new_lib_cat;
         cout << "Data loaded\n";
-        return false;
     }
     catch (Error& e)
     {
@@ -638,6 +637,7 @@ bool restore_all(data_container& lib_cat)
         Record::restore_ID_counter();
         throw Error(FILE_ERROR_MSG);
     }
+    return false;
 }
 
 bool quit(data_container& lib_cat)
