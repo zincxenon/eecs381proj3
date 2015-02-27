@@ -19,9 +19,8 @@
 
 using namespace std;
 
-const char * TITLE_ALREADY_FOUND_MSG = "Library already has a record with this title!";
-const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
 const char * UNRECOGNIZED_MSG = "Unrecognized command!";
+const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
 
 /* data types */
 
@@ -180,7 +179,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
     if (record_iter == lib_cat.library_title.end() || **record_iter != temp_record)
     {
-        throw Error("No record with that title!");
+        throw ErrorNoClear("No record with that title!");
     }
     return record_iter;
 }
@@ -216,7 +215,7 @@ void check_title_in_library(data_container& lib_cat, string title)
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
     if (title_check != lib_cat.library_title.end() && **title_check == temp_record)
     {
-        throw Error(TITLE_ALREADY_FOUND_MSG);
+        throw ErrorNoClear("Library already has a record with this title!");
     }
 }
 
@@ -529,7 +528,7 @@ bool delete_record(data_container& lib_cat)
     auto record_iter = read_title_get_iter(lib_cat);
     if (find_if(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::is_member_present, placeholders::_1, *record_iter)) != lib_cat.catalog.end())
     {
-        throw Error("Cannot delete a record that is a member of a collection!");
+        throw ErrorNoClear("Cannot delete a record that is a member of a collection!");
     }
     Record *record_ptr = *record_iter;
     lib_cat.library_title.erase(record_iter);
