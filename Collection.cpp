@@ -38,9 +38,6 @@ Collection::Collection(ifstream& is, const vector<Record*>& library)
         auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Less_than_ptr<Record*>());
         if (record_it == library.end() || **record_it != temp_record)
         {
-            cout << "title is " << title << endl;
-            cout << "temp_record is " << temp_record << endl;
-            cout << "found record is " << **record_it << endl;
             throw Error(FILE_ERROR_MSG);
         }
         elements.insert(*record_it);
@@ -76,7 +73,7 @@ void Collection::remove_member(Record* record_ptr)
 void Collection::save(ostream& os) const
 {
     os << name << " " << elements.size() << "\n";
-    for_each(elements.begin(), elements.end(), [](Record* record) { cout << record->get_title() << "\n"; });
+    for_each(elements.begin(), elements.end(), [](Record* record) { os << record->get_title() << "\n"; });
 }
 
 // Set union of the records in rhs and this
