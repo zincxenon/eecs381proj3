@@ -148,7 +148,6 @@ int main()
             string command;
             command += action;
             command += object;
-            cout << "command is " << command << endl;
             if (function_map.find(command) == function_map.end())
             {
                 throw Error(UNRECOGNIZED_MSG);
@@ -258,7 +257,9 @@ string title_read(istream &is)
 {
     string title;
     getline(is, title);
+    cout << "getline = " << title << endl;
     title = parse_title(title);
+    cout << "parsed title = " << title << endl;
     if (title.size() == 0)
     {
         throw ErrorNoClear("Could not read a title!");
@@ -283,7 +284,7 @@ struct title_parser
             remove_whitespace = true;
         }
     }
-    void finish()
+    void finalize()
     {
         if (isspace(title.back()))
         {
@@ -299,7 +300,7 @@ string parse_title(string& original)
 {
     title_parser title_helper;
     for_each(original.begin(), original.end(), title_helper);
-    title_helper.finish();
+    title_helper.finalize();
     return title_helper.get_title();
 }
 
