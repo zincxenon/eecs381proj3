@@ -266,7 +266,9 @@ string title_read(istream &is)
 {
     string raw_title;
     getline(is, raw_title);
+    cout << "raw title is " << raw_title << endl;
     string title = parse_title(raw_title);
+    cout << "title is " << title << endl;
     if (title.size() == 0)
     {
         throw ErrorNoClear("Could not read a title!");
