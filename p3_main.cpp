@@ -428,9 +428,9 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const) { process_record(record); });
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
     }
-    void process_record(Record* const)
+    void process_record(Record* const record)
     {
         if (record_count.find(record->get_ID()) == record_count.end())
         {
