@@ -257,9 +257,7 @@ string title_read(istream &is)
 {
     string raw_title;
     getline(is, raw_title);
-    cout << "getline = " << raw_title << endl;
     string title = parse_title(raw_title);
-    cout << "parsed title = " << title << endl;
     if (title.size() == 0)
     {
         throw ErrorNoClear("Could not read a title!");
@@ -271,7 +269,6 @@ struct title_parser
 {
     void operator()(char c)
     {
-        cout << "reading char " << c << endl;
         if (!isspace(c))
         {
             title.push_back(c);
@@ -284,7 +281,6 @@ struct title_parser
             }
             remove_whitespace = true;
         }
-        cout << "title is now " << title << endl;
     }
     void finalize()
     {
@@ -301,10 +297,8 @@ private:
 string parse_title(string& original)
 {
     title_parser title_helper;
-    for_each(original.begin(), original.end(), title_helper);
-    cout << "gettitle = " << title_helper.get_title() << endl;
+    for_each(original.begin(), original.end(), &title_helper);
     title_helper.finalize();
-    cout << "gettitle = " << title_helper.get_title() << endl;
     return title_helper.get_title();
 }
 
