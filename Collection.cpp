@@ -53,7 +53,6 @@ void Collection::add_member(Record* record_ptr)
         throw Error("Record is already a member in the collection!");
     }
     elements.insert(record_ptr);
-    for_each(elements.begin(), elements.end(), [](Record* record) {cout << "elements contains " << *record << endl;});
 }
 // Return true if the record is present, false if not.
 bool Collection::is_member_present(Record* record_ptr) const
@@ -69,7 +68,6 @@ void Collection::remove_member(Record* record_ptr)
         throw Error("Record is not a member in the collection!");
     }
     elements.erase(it);
-    for_each(elements.begin(), elements.end(), [](Record* record) {cout << "elements contains " << *record << endl;});
 }
 
 // Write a Collection's data to a stream in save format, with endl as specified.
