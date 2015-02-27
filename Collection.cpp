@@ -4,7 +4,6 @@
 #include <limits>
 #include <algorithm>
 #include <iterator>
-#include <algorithm>
 
 #include <string>
 #include <set>
@@ -77,8 +76,7 @@ void Collection::remove_member(Record* record_ptr)
 void Collection::save(ostream& os) const
 {
     os << name << " " << elements.size() << "\n";
-    ostream_iterator<Record*> out_it(os, "\n");
-    copy(elements.begin(), elements.end(), out_it);
+    for_each(elements.begin(), elements.end(), [](Record* record) { cout << record->get_title() << "\n"; });
 }
 
 // Set union of the records in rhs and this
