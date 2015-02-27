@@ -428,14 +428,14 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        cout << collection << endl;
-        cout << collection.get_elements().begin() << endl;
-        cout << collection.get_elements().end() << endl;
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
+        // the one range for
+        for (auto& record : collection.get_elements())
+        {
+            process_record(record);
+        }
     }
     void process_record(Record* const record)
     {
-        cout << record << endl;
         if (record_count.find(record->get_ID()) == record_count.end())
         {
             record_count[record->get_ID()] = 0;
@@ -610,11 +610,7 @@ bool save_all(data_container& lib_cat)
         throw Error(FILE_OPEN_FAIL_MSG);
     }
     file << lib_cat.library_title.size() << "\n";
-    // the one range for
-    for (auto&& record : lib_cat.library_title)
-    {
-        record->save(file);
-    }
+    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(&Record::save, placeholders::_1, ref(file)));
     file << lib_cat.catalog.size() << "\n";
     for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), bind(&Collection::save, placeholders::_1, ref(file)));
     cout << "Data saved\n";
