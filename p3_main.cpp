@@ -328,25 +328,34 @@ bool find_record(data_container& lib_cat)
     cout << *record_ptr << "\n";
     return false;
 }
-void search_record_for_string(string key, list<Record*>& records_with_string, Record* record)
+struct string_finder
 {
-    if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
+    string_finder(string key_) : key{key_} {}
+    void operator()(Record* record)
     {
-        records_with_string.push_back(record);
+        if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
+        {
+            matching_records.push_back(record);
+        }
     }
-}
+    list<Record*> get_matches() { return matching_records; }
+private:
+    list<Record*> matching_records;
+    string key;
+};
 bool find_string(data_container& lib_cat)
 {
     string key;
     cin >> key;
-    list<Record*> records_with_string;
-    for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), bind(search_record_for_string, key, ref(records_with_string), placeholders::_1));
-    if (records_with_string.size() == 0)
+    string_finder string_helper(key);
+    string_helper = for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), string_helper);
+    list<Record*> matching_records = string_helper.get_matches();
+    if (matching_records.size() == 0)
     {
         throw Error("No records contain that string!");
     }
     ostream_iterator<Record*> out_it(cout, "\n");
-    copy(records_with_string.begin(), records_with_string.end(), out_it);
+    copy(matching_records.begin(), matching_records.end(), out_it);
     return false;
 }
 
