@@ -428,12 +428,14 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
+        if (!collection.empty())
+        {
+            for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
+        }
     }
     void process_record(Record* const record)
     {
         cout << record << endl;
-        cout << *record << endl;
         if (record_count.find(record->get_ID()) == record_count.end())
         {
             record_count[record->get_ID()] = 0;
