@@ -449,6 +449,7 @@ public:
             ++many;
         }
         ++all;
+        ++current_count;
     }
     int get_one() { return at_least_one; }
     int get_many() { return many; }
