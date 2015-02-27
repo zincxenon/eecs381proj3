@@ -21,6 +21,7 @@ using namespace std;
 
 const char * TITLE_ALREADY_FOUND_MSG = "Library already has a record with this title!";
 const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
+const char * UNRECOGNIZED_MSG = "Unrecognized command!";
 
 /* data types */
 
@@ -140,11 +141,19 @@ int main()
         {
             char action, object;
             cout << "\nEnter command: ";
-            if (!(cin >> action >> object) || function_map.find("" + action + object) == function_map.end())
+            if (!(cin >> action >> object))
             {
-                throw Error("Unrecognized command!");
+                throw Error(UNRECOGNIZED_MSG);
             }
-            if (function_map["" + action + object](lib_cat))
+            string command;
+            command += action;
+            command += object;
+            cout << "command is " << command << endl;
+            if (function_map.find(command) == function_map.end())
+            {
+                throw Error(UNRECOGNIZED_MSG);
+            }
+            if (function_map[command](lib_cat))
             {
                 return 0;
             }
