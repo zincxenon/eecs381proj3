@@ -91,7 +91,7 @@ ostream& operator<< (ostream& os, const Collection& collection)
     os << "Collection " << collection.name << " contains:";
     if (collection.empty())
     {
-        os << " None";
+        os << " None\n";
     }
     else
     {

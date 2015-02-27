@@ -396,7 +396,7 @@ bool print_catalog(data_container& lib_cat)
     else
     {
         cout << "Catalog contains " << lib_cat.catalog.size() << " collections:\n";
-        ostream_iterator<Collection> out_it(cout, "\n");
+        ostream_iterator<Collection> out_it(cout);
         copy(lib_cat.catalog.begin(), lib_cat.catalog.end(), out_it);
     }
     return false;
