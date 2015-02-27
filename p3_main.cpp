@@ -271,6 +271,7 @@ struct title_parser
 {
     void operator()(char c)
     {
+        cout << "reading char " << c << endl;
         if (!isspace(c))
         {
             title.push_back(c);
@@ -283,6 +284,7 @@ struct title_parser
             }
             remove_whitespace = true;
         }
+        cout << "title is now " << title << endl;
     }
     void finalize()
     {
