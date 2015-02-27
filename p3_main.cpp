@@ -188,13 +188,10 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
 vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
-    cout << "id read is " << id << endl;
-    for_each(lib_cat.library_id.begin(), lib_cat.library_id.end(), [](Record* record) {cout << "record here is " << *record << endl;});
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
     if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
     {
-        cout << "found id is " << (*record_iter)->get_ID() << endl;
         throw Error("No record with that ID!");
     }
     return record_iter;
@@ -506,7 +503,6 @@ bool add_record(data_container& lib_cat)
     check_title_in_library(lib_cat, title);
     Record *record = insert_record(lib_cat, new Record(medium, title));
     cout << "Record " << record->get_ID() << " added\n";
-    for_each(lib_cat.library_id.begin(), lib_cat.library_id.end(), [](Record* record) {cout << "record here is " << *record << endl;});
     return false;
 }
 bool add_collection(data_container& lib_cat)
