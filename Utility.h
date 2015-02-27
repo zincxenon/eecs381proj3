@@ -5,11 +5,6 @@
 
 extern const char * FILE_ERROR_MSG;
 
-// Records in the library are held in the following container
-typedef std::vector<Record*> Record_container;
-// Records in the library are sorted by title with this comparison functor
-typedef Less_than_ptr<Record*> Title_compare;
-
 // a simple class for error exceptions - msg points to a C-string error message
 struct Error {
 	Error(const char* msg_ = "") :

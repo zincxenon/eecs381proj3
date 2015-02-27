@@ -20,7 +20,7 @@ using namespace std;
     No check made for whether the Collection already exists or not.
     Throw Error exception if invalid data discovered in file.
     string data input is read directly into the member variable. */
-Collection::Collection(ifstream& is, const Record_container& library)
+Collection::Collection(ifstream& is, const vector<Record*>& library)
 {
     int num;
     if (!(is >> name >> num))
@@ -33,7 +33,7 @@ Collection::Collection(ifstream& is, const Record_container& library)
         string title;
         getline(is, title);
         Record temp_record(title);
-        auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Title_compare());
+        auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Less_than_ptr<Record*>());
         if (record_it == library.end() || **record_it != temp_record)
         {
             throw Error(FILE_ERROR_MSG);

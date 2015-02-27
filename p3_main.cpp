@@ -25,8 +25,13 @@ const char * LIBRARY_EMPTY_MSG = "Library is empty\n";
 
 /* data types */
 
+// Records in the library are held in the following container
+typedef std::vector<Record*> Record_container;
 // Collections in the catalog are held using the following container
 typedef vector<Collection> Catalog_container;
+
+// Records in the library are sorted by title with this comparison functor
+typedef Less_than_ptr<Record*> Title_compare;
 
 // Record IDs are compared using this functor
 struct ID_compare {
@@ -716,7 +721,7 @@ bool restore_all(data_container& lib_cat)
         {
             insert_record(new_lib_cat, new Record(file));
         }
-        int num_collections
+        int num_collections;
         if (!(file >> num_collections))
         {
             throw Error(FILE_ERROR_MSG);
