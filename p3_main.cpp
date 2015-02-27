@@ -246,7 +246,7 @@ Record* insert_record(data_container& lib_cat, Record* record)
 void insert_collection(data_container& lib_cat, Collection&& collection)
 {
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
-    if (collection_iter == lib_cat.catalog.end() || *collection_iter == collection)
+    if (collection_iter == lib_cat.catalog.end() && *collection_iter == collection)
     {
         throw Error("Catalog already has a collection with this name!");
     }
