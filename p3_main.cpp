@@ -222,9 +222,10 @@ void check_title_in_library(data_container& lib_cat, string title)
 
 void insert_record(data_container& lib_cat, Record* record)
 {
+    auto title_lower_bound = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>());
     try
     {
-        lib_cat.library_title.insert(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>()), record);
+        lib_cat.library_title.insert(title_lower_bound, record);
     } catch (...)
     {
         delete record;
@@ -235,6 +236,7 @@ void insert_record(data_container& lib_cat, Record* record)
         lib_cat.library_id.insert(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp()), record);
     } catch (...)
     {
+        lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>()));
         delete record;
         throw;
     }
