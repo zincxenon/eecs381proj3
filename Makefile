@@ -1,7 +1,7 @@
 CC = g++
 LD = g++
 
-CFLAGS = -c -pedantic-errors -std=c++11 -Wall -fno-elide-constructors
+CFLAGS = -c -pedantic-errors -std=c++11 -Wall
 LFLAGS = -pedantic -Wall
 
 OBJS = p3_main.o Record.o Collection.o Utility.o
