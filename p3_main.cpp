@@ -303,6 +303,7 @@ string parse_title(string& original)
     title_parser title_helper;
     for_each(original.begin(), original.end(), title_helper);
     title_helper.finalize();
+    cout << "gettitle = " << title_helper.get_title() << endl;
     return title_helper.get_title();
 }
 
