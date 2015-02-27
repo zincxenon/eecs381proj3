@@ -194,7 +194,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
     {
         if (record_iter == lib_cat.library_id.end()) cout << "end()" << endl;
-        else cout << "!=" << endl;
+        else cout << **record_iter << " != " << temp_record << endl;
         throw Error("No record with that ID!");
     }
     return record_iter;
