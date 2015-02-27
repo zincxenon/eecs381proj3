@@ -432,6 +432,8 @@ public:
     }
     void process_record(Record* const record)
     {
+        cout << record << endl;
+        cout << *record << endl;
         if (record_count.find(record->get_ID()) == record_count.end())
         {
             record_count[record->get_ID()] = 0;
