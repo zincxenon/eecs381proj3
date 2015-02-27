@@ -79,7 +79,7 @@ void Collection::save(ostream& os) const
 // Set union of the records in rhs and this
 Collection& Collection::operator+=(const Collection &rhs)
 {
-    for_each(rhs.elements.begin(), rhs.elements.end(), [this](Record* record) { if (!is_member_present(record)) { add_member(record); }});
+    for_each(rhs.elements.begin(), rhs.elements.end(), [this](Record* record) { if (!is_member_present(record)) { elements.insert(record); }});
     return *this;
 }
 

@@ -476,6 +476,7 @@ bool combine_collections(data_container& lib_cat)
     cin >> new_name;
     Collection result(new_name, first);
     result += second;
+    insert_collection(lib_cat, result);
     cout << "Collections " << first.get_name() << " and " << second.get_name() << " combined into new collection " << new_name << "\n";
     return false;
 }
