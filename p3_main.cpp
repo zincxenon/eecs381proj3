@@ -344,11 +344,10 @@ private:
     list<Record*> matching_records;
     string key;
 
-    string& string_to_lower(string& original)
+    static string& string_to_lower(string original)
     {
-        string new_string = original;
-        for_each(new_string.begin(), new_string.end(), tolower);
-        return new_string;
+        for_each(original.begin(), original.end(), tolower);
+        return original;
     }
 };
 bool find_string(data_container& lib_cat)
