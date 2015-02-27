@@ -330,7 +330,7 @@ bool find_record(data_container& lib_cat)
 }
 struct string_finder
 {
-    string_finder(string key_) : key{key_} {}
+    string_finder(string key_) : key{key_} { cout << "key is " << key;}
     void operator()(Record* record)
     {
         if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
