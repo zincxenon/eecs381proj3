@@ -189,11 +189,12 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     cout << "id read is " << id << endl;
+    for_each(lib_cat.library_id.begin(), lib_cat.library_id.end(), [](Record* record) {cout << "record here is " << *record << endl;});
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
     if (record_iter == lib_cat.library_id.end() || (*record_iter)->get_ID() != id)
     {
-        cout << "found id is " << (*record_iter)->get_ID();
+        cout << "found id is " << (*record_iter)->get_ID() << endl;
         throw Error("No record with that ID!");
     }
     return record_iter;
