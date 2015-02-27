@@ -203,7 +203,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     cin >> name;
     Collection temp_collection(name);
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), temp_collection);
-    if (collection_iter == lib_cat.catalog.end() || **collection_iter != temp_collection)
+    if (collection_iter == lib_cat.catalog.end() || *collection_iter != temp_collection)
     {
         throw Error("No collection with that name!");
     }
