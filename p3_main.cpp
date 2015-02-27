@@ -428,10 +428,8 @@ struct Collection_stats {
 public:
     void operator()(Collection& collection)
     {
-        if (!collection.empty())
-        {
-            for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
-        }
+        cout << collection << endl;
+        for_each(collection.get_elements().begin(), collection.get_elements().end(), [this](Record* const record) { process_record(record); });
     }
     void process_record(Record* const record)
     {
