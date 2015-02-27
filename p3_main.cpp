@@ -39,6 +39,10 @@ struct record_id_comp {
 
 /* lib cat helper functions dec */
 
+vector<Record*>::iterator lib_title_lower_bound(data_container& lib_cat, Record* record);
+vector<Record*>::iterator lib_id_lower_bound(data_container& lib_cat, Record* record);
+vector<Collection>::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection);
+
 vector<Record*>::iterator read_title_get_iter(data_container& lib_cat);
 vector<Record*>::iterator read_id_get_iter(data_container& lib_cat);
 vector<Collection>::iterator read_name_get_iter(data_container& lib_cat);
@@ -173,11 +177,24 @@ int main()
 
 /* lib cat helper functions impl */
 
+vector<Record*>::iterator lib_title_lower_bound(data_container& lib_cat, Record* record)
+{
+    return lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>());
+}
+vector<Record*>::iterator lib_id_lower_bound(data_container& lib_cat, Record* record)
+{
+    return lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp());
+}
+vector<Collection>::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection)
+{
+    return lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
+}
+
 vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
 {
     string title = title_read(cin);
     Record temp_record(title);
-    auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
+    auto record_iter = lib_title_lower_bound(lib_cat, &temp_record);
     if (record_iter == lib_cat.library_title.end() || **record_iter != temp_record)
     {
         throw ErrorNoClear("No record with that title!");
@@ -189,7 +206,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     Record temp_record(id);
-    auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
+    auto record_iter = lib_id_lower_bound(lib_cat, &temp_record);
     if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
     {
         throw Error("No record with that ID!");
@@ -202,7 +219,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     string name;
     cin >> name;
     Collection temp_collection(name);
-    auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), temp_collection);
+    auto collection_iter = catalog_lower_bound(lib_cat, temp_collection);
     if (collection_iter == lib_cat.catalog.end() || *collection_iter != temp_collection)
     {
         throw Error("No collection with that name!");
@@ -213,7 +230,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
 void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
-    auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
+    auto title_check = lib_title_lower_bound(lib_cat, &temp_record);
     if (title_check != lib_cat.library_title.end() && **title_check == temp_record)
     {
         throw ErrorNoClear("Library already has a record with this title!");
@@ -222,7 +239,7 @@ void check_title_in_library(data_container& lib_cat, string title)
 
 Record* insert_record(data_container& lib_cat, Record* record)
 {
-    auto title_lower_bound = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>());
+    auto title_lower_bound = lib_title_lower_bound(lib_cat, record);
     try
     {
         lib_cat.library_title.insert(title_lower_bound, record);
@@ -233,10 +250,10 @@ Record* insert_record(data_container& lib_cat, Record* record)
     }
     try
     {
-        lib_cat.library_id.insert(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp()), record);
+        lib_cat.library_id.insert(lib_id_lower_bound(lib_cat, record), record);
     } catch (...)
     {
-        lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>()));
+        lib_cat.library_title.erase(title_lower_bound);
         delete record;
         throw;
     }
@@ -245,7 +262,7 @@ Record* insert_record(data_container& lib_cat, Record* record)
 
 void insert_collection(data_container& lib_cat, Collection&& collection)
 {
-    auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
+    auto collection_iter = catalog_lower_bound(lib_cat, collection);
     if (collection_iter != lib_cat.catalog.end() && *collection_iter == collection)
     {
         throw Error("Catalog already has a collection with this name!");
@@ -511,7 +528,7 @@ bool modify_title(data_container& lib_cat)
 
     lib_cat.library_id.erase(record_iter);
     assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
-    lib_cat.library_title.erase(lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
+    lib_cat.library_title.erase(lib_title_lower_bound(lib_cat, record_ptr));
 
     string old_title = record_ptr->get_title();
     record_ptr->set_title(title);
@@ -560,7 +577,7 @@ bool delete_record(data_container& lib_cat)
     Record *record_ptr = *record_iter;
     lib_cat.library_title.erase(record_iter);
     assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
-    lib_cat.library_id.erase(lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
+    lib_cat.library_id.erase(lib_id_lower_bound(lib_cat, record_ptr));
     cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
     delete record_ptr;
     return false;
