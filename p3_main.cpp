@@ -371,7 +371,7 @@ bool list_ratings(data_container& lib_cat)
     data_container temp_lib_cat;
     temp_lib_cat.library_title = lib_cat.library_title;
     sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), [](const Record* a, const Record* b)
-        { return a->get_rating() == b->get_rating() ? a < b : a->get_rating() > b->get_rating(); });
+        { return a->get_rating() == b->get_rating() ? *a < *b : a->get_rating() > b->get_rating(); });
     print_library(temp_lib_cat);
     return false;
 }
