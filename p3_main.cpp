@@ -541,8 +541,9 @@ bool delete_collection(data_container& lib_cat)
 {
     auto collection_iter = read_name_get_iter(lib_cat);
     Collection& collection = *collection_iter;
+    string name = collection.get_name();
     lib_cat.catalog.erase(collection_iter);
-    cout << "Collection " << collection.get_name() << " deleted\n";
+    cout << "Collection " << name << " deleted\n";
     return false;
 }
 bool delete_member(data_container& lib_cat)
