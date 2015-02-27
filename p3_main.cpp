@@ -178,7 +178,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     string title = title_read(cin);
     Record temp_record(title);
     auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (record_iter == lib_cat.library_title.end() || **record_iter != temp_record)
+    if (record_iter == lib_cat.library_title.end() || (*record_iter)->get_title() != title)
     {
         throw Error("No record with that title!");
     }
@@ -191,10 +191,8 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     cout << "id read is " << id << endl;
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
-    if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
+    if (record_iter == lib_cat.library_id.end() || (*record_iter)->get_ID() != id)
     {
-        if (record_iter == lib_cat.library_id.end()) cout << "end()" << endl;
-        else cout << **record_iter << " != " << temp_record << endl;
         throw Error("No record with that ID!");
     }
     return record_iter;
@@ -206,7 +204,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     cin >> name;
     Collection temp_collection(name);
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), temp_collection);
-    if (collection_iter == lib_cat.catalog.end() || *collection_iter != temp_collection)
+    if (collection_iter == lib_cat.catalog.end() || (*collection_iter).get_name() != name)
     {
         throw Error("No collection with that name!");
     }
@@ -217,7 +215,7 @@ void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (title_check != lib_cat.library_title.end() && **title_check == temp_record)
+    if (title_check != lib_cat.library_title.end() && (*title_check)->get_title() != title)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
     }
@@ -471,15 +469,6 @@ bool modify_rating(data_container& lib_cat)
     record_ptr->set_rating(rating);
     cout << "Rating for record " << record_ptr->get_ID() << " changed to " << rating << "\n";
     return false;
-}
-void reorder_record_in_catalog(Collection& collection, string old_title, Record* record)
-{
-    Record temp_record(old_title);
-    if (collection.is_member_present(&temp_record))
-    {
-        collection.remove_member(&temp_record);
-        collection.add_member(record);
-    }
 }
 bool modify_title(data_container& lib_cat)
 {
