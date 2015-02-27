@@ -369,7 +369,7 @@ bool print_record(data_container& lib_cat)
 }
 bool print_collection(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat);
+    Collection& collection = *read_name_get_iter(lib_cat);
     cout << collection;
     return false;
 }
@@ -515,7 +515,7 @@ bool add_collection(data_container& lib_cat)
 }
 bool add_member(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat);
+    Collection& collection = *read_name_get_iter(lib_cat);
     Record *record_ptr = *read_id_get_iter(lib_cat);
     collection.add_member(record_ptr);
     cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " added\n";
@@ -540,14 +540,14 @@ bool delete_record(data_container& lib_cat)
 bool delete_collection(data_container& lib_cat)
 {
     auto collection_iter = read_name_get_iter(lib_cat);
-    Collection collection = *collection_iter;
+    Collection& collection = *collection_iter;
     lib_cat.catalog.erase(collection_iter);
     cout << "Collection " << collection.get_name() << " deleted\n";
     return false;
 }
 bool delete_member(data_container& lib_cat)
 {
-    Collection collection = *read_name_get_iter(lib_cat);
+    Collection& collection = *read_name_get_iter(lib_cat);
     Record *record_ptr = *read_id_get_iter(lib_cat);
     collection.remove_member(record_ptr);
     cout << "Member " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
