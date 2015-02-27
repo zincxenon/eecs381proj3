@@ -45,7 +45,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat);
 
 void check_title_in_library(data_container& lib_cat, string title);
 
-void insert_record(data_container& lib_cat, Record* record);
+Record* insert_record(data_container& lib_cat, Record* record);
 void insert_collection(data_container& lib_cat, Collection&& collection);
 
 void clear_library_data(data_container& lib_cat);
@@ -220,7 +220,7 @@ void check_title_in_library(data_container& lib_cat, string title)
     }
 }
 
-void insert_record(data_container& lib_cat, Record* record)
+Record* insert_record(data_container& lib_cat, Record* record)
 {
     auto title_lower_bound = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>());
     try
@@ -240,6 +240,7 @@ void insert_record(data_container& lib_cat, Record* record)
         delete record;
         throw;
     }
+    return record;
 }
 
 void insert_collection(data_container& lib_cat, Collection&& collection)
