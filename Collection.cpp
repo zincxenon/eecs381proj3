@@ -73,7 +73,7 @@ void Collection::remove_member(Record* record_ptr)
 void Collection::save(ostream& os) const
 {
     os << name << " " << elements.size() << "\n";
-    for_each(elements.begin(), elements.end(), [](Record* record) { os << record->get_title() << "\n"; });
+    for_each(elements.begin(), elements.end(), [&os](Record* record) { os << record->get_title() << "\n"; });
 }
 
 // Set union of the records in rhs and this
