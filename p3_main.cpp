@@ -255,10 +255,10 @@ void clear_library_data(data_container& lib_cat)
 
 string title_read(istream &is)
 {
-    string title;
-    getline(is, title);
-    cout << "getline = " << title << endl;
-    title = parse_title(title);
+    string raw_title;
+    getline(is, raw_title);
+    cout << "getline = " << raw_title << endl;
+    string title = parse_title(raw_title);
     cout << "parsed title = " << title << endl;
     if (title.size() == 0)
     {
