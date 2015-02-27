@@ -334,6 +334,8 @@ struct string_finder
     void operator()(Record* record)
     {
         string temp_title = string_to_lower(record->get_title());
+        cout << "key is " << key << endl;
+        cout << "title is " << temp_title << endl;
         if (temp_title.find(key) != string::npos)
         {
             matching_records.push_back(record);
