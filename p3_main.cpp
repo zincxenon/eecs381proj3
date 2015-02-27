@@ -346,7 +346,7 @@ private:
 
     static string string_to_lower(string original)
     {
-        for_each(original.begin(), original.end(), &tolower);
+        for_each(original.begin(), original.end(), ::tolower);
         return original;
     }
 };
