@@ -344,7 +344,7 @@ private:
     list<Record*> matching_records;
     string key;
 
-    static string& string_to_lower(string original)
+    static string string_to_lower(string original)
     {
         for_each(original.begin(), original.end(), tolower);
         return original;
