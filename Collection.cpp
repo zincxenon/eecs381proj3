@@ -39,6 +39,9 @@ Collection::Collection(ifstream& is, const vector<Record*>& library)
         auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Less_than_ptr<Record*>());
         if (record_it == library.end() || **record_it != temp_record)
         {
+            cout << "title is " << title << endl;
+            cout << "temp_record is " << temp_record << endl;
+            cout << "found record is " << **record_it << endl;
             throw Error(FILE_ERROR_MSG);
         }
         elements.insert(*record_it);
