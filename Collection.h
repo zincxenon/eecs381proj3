@@ -17,6 +17,8 @@ Collection objects manage their own Record container.
 The container of Records is not available to clients.
 */
 
+typedef std::set<Record*, Less_than_ptr<Record*>> RecordSet;
+
 class Collection {
 
 public:
@@ -38,7 +40,7 @@ public:
 	std::string get_name() const
 		{return name;}
 
-	const std::set<Record*, Less_than_ptr<Record*>> get_elements() const
+	const RecordSet get_elements() const
 		{return elements;}
 		
 	// Add the Record, throw exception if there is already a Record with the same title.
@@ -72,7 +74,7 @@ public:
 		
 private:
 	std::string name;
-    std::set<Record*, Less_than_ptr<Record*>> elements;
+    RecordSet elements;
 
     void print_record_title(Record* record, std::ostream& os);
 };
