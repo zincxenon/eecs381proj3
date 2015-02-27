@@ -21,6 +21,7 @@ using namespace std;
 
 const char * UNRECOGNIZED_MSG = "Unrecognized command!";
 const char * FILE_OPEN_FAIL_MSG = "Could not open file!";
+const char * LIBRARY_EMPTY_MSG = "Library is empty\n";
 
 /* data types */
 
@@ -368,6 +369,11 @@ bool find_string(data_container& lib_cat)
 
 bool list_ratings(data_container& lib_cat)
 {
+    if (lib_cat.library_title.empty())
+    {
+        cout << LIBRARY_EMPTY_MSG;
+        return false;
+    }
     data_container temp_lib_cat;
     temp_lib_cat.library_title = lib_cat.library_title;
     sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), [](const Record* a, const Record* b)
@@ -393,7 +399,7 @@ bool print_library(data_container& lib_cat)
 {
     if (lib_cat.library_title.empty())
     {
-        cout << "Library is empty\n";
+        cout << LIBRARY_EMPTY_MSG;
     }
     else
     {
