@@ -72,8 +72,9 @@ public:
     // This operator defines the order relation between Records, based just on the last title
     bool operator<(const Record &rhs) const { return title < rhs.title; }
 
+    // Record equality operator, checks both title and ID for a match
     bool operator==(const Record &rhs) const {return title == rhs.title || ID == rhs.ID; }
-
+    // Record inequality operator
     bool operator!=(const Record &rhs) const {return title != rhs.title && ID != rhs.ID; }
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);

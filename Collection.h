@@ -17,7 +17,8 @@ Collection objects manage their own Record container.
 The container of Records is not available to clients.
 */
 
-typedef std::set<Record*, Less_than_ptr<Record*>> RecordSet;
+// Container used to hold the records contained in a collection
+typedef std::set<Record*, Less_than_ptr<Record*>> Record_set;
 
 class Collection {
 
@@ -34,13 +35,13 @@ public:
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
 	std::string data input is read directly into the member variable. */
-    Collection(std::ifstream& is, const std::vector<Record*>& library);
+    Collection(std::ifstream& is, const Record_container& library);
 
 	// Accessors
 	std::string get_name() const
 		{return name;}
 
-	const RecordSet get_elements() const
+	const Record_set get_elements() const
 		{return elements;}
 		
 	// Add the Record, throw exception if there is already a Record with the same title.
@@ -59,7 +60,7 @@ public:
 	// Write a Collections's data to a stream in save format, with endl as specified.
 	void save(std::ostream& os) const;
 
-	// Set union of the records in rhs and this
+	// Combine this collection with rhs
 	Collection& operator+=(const Collection &rhs);
 
 	// This operator defines the order relation between Collections, based just on the name
@@ -74,7 +75,7 @@ public:
 		
 private:
 	std::string name;
-    RecordSet elements;
+    Record_set elements;
 
     void print_record_title(Record* record, std::ostream& os);
 };

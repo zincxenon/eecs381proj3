@@ -12,8 +12,6 @@
 #include "Record.h"
 #include "Utility.h"
 
-#include <iostream>
-
 using namespace std;
 
 /* Construct a Collection from an input file stream in save format, using the record list,
@@ -22,7 +20,7 @@ using namespace std;
     No check made for whether the Collection already exists or not.
     Throw Error exception if invalid data discovered in file.
     string data input is read directly into the member variable. */
-Collection::Collection(ifstream& is, const vector<Record*>& library)
+Collection::Collection(ifstream& is, const Record_container& library)
 {
     int num;
     if (!(is >> name >> num))
@@ -35,7 +33,7 @@ Collection::Collection(ifstream& is, const vector<Record*>& library)
         string title;
         getline(is, title);
         Record temp_record(title);
-        auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Less_than_ptr<Record*>());
+        auto record_it = lower_bound(library.begin(), library.end(), &temp_record, Title_compare());
         if (record_it == library.end() || **record_it != temp_record)
         {
             throw Error(FILE_ERROR_MSG);
@@ -76,7 +74,7 @@ void Collection::save(ostream& os) const
     for_each(elements.begin(), elements.end(), [&os](Record* record) { os << record->get_title() << "\n"; });
 }
 
-// Set union of the records in rhs and this
+// Combine this collection with rhs
 Collection& Collection::operator+=(const Collection &rhs)
 {
     for_each(rhs.elements.begin(), rhs.elements.end(), [this](Record* record) { if (!is_member_present(record)) { elements.insert(record); }});

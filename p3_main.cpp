@@ -25,39 +25,60 @@ const char * LIBRARY_EMPTY_MSG = "Library is empty\n";
 
 /* data types */
 
-struct data_container {
-    vector<Collection> catalog;
-    vector<Record*> library_title;
-    vector<Record*> library_id;
-};
+// Collections in the catalog are held using the following container
+typedef vector<Collection> Catalog_container;
 
-typedef bool (*data_container_func)(data_container&);
-
-struct record_id_comp {
+// Record IDs are compared using this functor
+struct ID_compare {
     bool operator() (const Record *lhs, const Record *rhs) const { return lhs->get_ID() < rhs->get_ID(); }
 };
 
+// Struct holding the library and catalog information
+struct data_container {
+    Catalog_container catalog;
+    Record_container library_title;
+    Record_container library_id;
+};
+
+/* Function pointer used in command map
+ * Returns true if the user is finished, false otherwise
+ */
+typedef bool (*data_container_func)(data_container&);
+
 /* lib cat helper functions dec */
 
-vector<Record*>::iterator lib_title_lower_bound(data_container& lib_cat, Record* record);
-vector<Record*>::iterator lib_id_lower_bound(data_container& lib_cat, Record* record);
-vector<Collection>::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection);
+// Performs a title-based lower_bound on the library for a given record
+Record_container::iterator lib_title_lower_bound(data_container& lib_cat, Record* record);
+// Performs an id-based lower_bound on the library for a given record
+Record_container::iterator lib_id_lower_bound(data_container& lib_cat, Record* record);
+// Performs a lower_bound on the catalog for a collection
+Catalog_container::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection);
 
-vector<Record*>::iterator read_title_get_iter(data_container& lib_cat);
-vector<Record*>::iterator read_id_get_iter(data_container& lib_cat);
-vector<Collection>::iterator read_name_get_iter(data_container& lib_cat);
+// Read a title from stdin and then return an iterator to a record in the library with that title
+Record_container::iterator read_title_get_iter(data_container& lib_cat);
+// Read an id from stdin and then return an iterator to a record in the library with that id
+Record_container::iterator read_id_get_iter(data_container& lib_cat);
+// Read a name from stdin and then return an iterator to a collection in the catalog with that name
+Catalog_container::iterator read_name_get_iter(data_container& lib_cat);
 
+// Checks if the provided title is already in the library
 void check_title_in_library(data_container& lib_cat, string title);
 
+// Inserts a record into the library and returns a pointer to the inserted record
 Record* insert_record(data_container& lib_cat, Record* record);
+// Inserts a collection into the catalog
 void insert_collection(data_container& lib_cat, Collection&& collection);
 
+// Clears the library and its data
 void clear_library_data(data_container& lib_cat);
 
 /* other functions dec */
 
+// Reads a title from stdin
 string title_read(istream &is);
+// Processes a string and removes excess whitespace
 string parse_title(string& title_string);
+// Reads an integer from stdin and throws an error if it fails
 int integer_read();
 
 /* main lib cat functions dec */
@@ -177,20 +198,24 @@ int main()
 
 /* lib cat helper functions impl */
 
-vector<Record*>::iterator lib_title_lower_bound(data_container& lib_cat, Record* record)
+// Performs a title-based lower_bound on the library for a given record
+Record_container::iterator lib_title_lower_bound(data_container& lib_cat, Record* record)
 {
-    return lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Less_than_ptr<Record*>());
+    return lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), record, Title_compare());
 }
-vector<Record*>::iterator lib_id_lower_bound(data_container& lib_cat, Record* record)
+// Performs an id-based lower_bound on the library for a given record
+Record_container::iterator lib_id_lower_bound(data_container& lib_cat, Record* record)
 {
-    return lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, record_id_comp());
+    return lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), record, ID_compare());
 }
-vector<Collection>::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection)
+// Performs a lower_bound on the catalog for a collection
+Catalog_container::iterator catalog_lower_bound(data_container& lib_cat, Collection& collection)
 {
     return lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), collection);
 }
 
-vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
+// Read a title from stdin and then return an iterator to a record in the library with that title
+Record_container::iterator read_title_get_iter(data_container& lib_cat)
 {
     string title = title_read(cin);
     Record temp_record(title);
@@ -201,8 +226,8 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     }
     return record_iter;
 }
-
-vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
+// Read an id from stdin and then return an iterator to a record in the library with that id
+Record_container::iterator read_id_get_iter(data_container& lib_cat)
 {
     int id = integer_read();
     Record temp_record(id);
@@ -213,8 +238,8 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     }
     return record_iter;
 }
-
-vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
+// Read a name from stdin and then return an iterator to a collection in the catalog with that name
+Catalog_container::iterator read_name_get_iter(data_container& lib_cat)
 {
     string name;
     cin >> name;
@@ -227,6 +252,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     return collection_iter;
 }
 
+// Checks if the provided title is already in the library
 void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
@@ -237,6 +263,7 @@ void check_title_in_library(data_container& lib_cat, string title)
     }
 }
 
+// Inserts a record into the library and returns a pointer to the inserted record
 Record* insert_record(data_container& lib_cat, Record* record)
 {
     auto title_lower_bound = lib_title_lower_bound(lib_cat, record);
@@ -253,6 +280,7 @@ Record* insert_record(data_container& lib_cat, Record* record)
         lib_cat.library_id.insert(lib_id_lower_bound(lib_cat, record), record);
     } catch (...)
     {
+        // if this insertion fails, we need to remove the record from the other container!
         lib_cat.library_title.erase(title_lower_bound);
         delete record;
         throw;
@@ -260,6 +288,7 @@ Record* insert_record(data_container& lib_cat, Record* record)
     return record;
 }
 
+// Inserts a collection into the catalog
 void insert_collection(data_container& lib_cat, Collection&& collection)
 {
     auto collection_iter = catalog_lower_bound(lib_cat, collection);
@@ -270,6 +299,7 @@ void insert_collection(data_container& lib_cat, Collection&& collection)
     lib_cat.catalog.insert(collection_iter, collection);
 }
 
+// Clears the library and its data
 void clear_library_data(data_container& lib_cat)
 {
     for_each(lib_cat.library_title.begin(), lib_cat.library_title.end(), [](Record* record) { delete record; });
@@ -279,18 +309,20 @@ void clear_library_data(data_container& lib_cat)
 
 /* other functions impl */
 
+// Reads a title from stdin
 string title_read(istream &is)
 {
     string raw_title;
     getline(is, raw_title);
     string title = parse_title(raw_title);
+    // valid titles must be at 1 character long
     if (title.size() == 0)
     {
         throw ErrorNoClear("Could not read a title!");
     }
     return title;
 }
-
+// functor used to parse a string and remove excess whitespace
 struct title_parser
 {
     void operator()(char c)
@@ -301,6 +333,9 @@ struct title_parser
             remove_whitespace = false;
         } else
         {
+            /* if remove_whitespace is false, the last character read must not have been whitespace and we need
+             * a space, otherwise do not add this character to the string
+             */
             if (!remove_whitespace)
             {
                 title.push_back(' ');
@@ -308,6 +343,7 @@ struct title_parser
             remove_whitespace = true;
         }
     }
+    // removes terminating whitespace from processed string
     void finalize()
     {
         if (isspace(title.back()))
@@ -320,6 +356,7 @@ private:
     string title;
     bool remove_whitespace = true;
 };
+// Processes a string and removes excess whitespace
 string parse_title(string& original)
 {
     title_parser title_helper;
@@ -327,7 +364,7 @@ string parse_title(string& original)
     title_helper.finalize();
     return title_helper.get_title();
 }
-
+// Reads an integer from stdin and throws an error if it fails
 int integer_read()
 {
     int integer;
@@ -346,6 +383,7 @@ bool find_record(data_container& lib_cat)
     cout << *record_ptr << "\n";
     return false;
 }
+// functor used to find records with titles containing a string
 struct string_finder
 {
     string_finder(string key_) : key(string_to_lower(key_)) {}
@@ -362,6 +400,7 @@ private:
     list<Record*> matching_records;
     string key;
 
+    // converts a string to all lowercase
     static string string_to_lower(string original)
     {
         transform(original.begin(), original.end(), original.begin(), ::tolower);
@@ -391,12 +430,12 @@ bool list_ratings(data_container& lib_cat)
         cout << LIBRARY_EMPTY_MSG;
         return false;
     }
-    data_container temp_lib_cat;
-    temp_lib_cat.library_title = lib_cat.library_title;
-    sort(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), [](const Record* a, const Record* b)
+    Record_container sorted_by_rating = lib_cat.library_title;
+    // sort the new container by rating first, then by title
+    sort(sorted_by_rating.begin(), sorted_by_rating.end(), [](const Record* a, const Record* b)
         { return a->get_rating() == b->get_rating() ? *a < *b : a->get_rating() > b->get_rating(); });
     ostream_iterator<Record*> out_it(cout, "\n");
-    copy(temp_lib_cat.library_title.begin(), temp_lib_cat.library_title.end(), out_it);
+    copy(sorted_by_rating.begin(), sorted_by_rating.end(), out_it);
     return false;
 }
 
@@ -448,6 +487,7 @@ bool print_allocation(data_container& lib_cat)
     return false;
 }
 
+// functor used to gather stats about the collections
 struct Collection_stats {
 public:
     void operator()(Collection& collection)
@@ -460,16 +500,20 @@ public:
     }
     void process_record(Record* const record)
     {
+        // add key to map if it has not yet been added
         if (record_count.find(record->get_ID()) == record_count.end())
         {
             record_count[record->get_ID()] = 0;
         }
+        // find the current value of the record's ID in the map
         int& current_count = record_count[record->get_ID()];
         if (current_count == 0)
         {
+            // if the current value is 0, it must be in at least one collection
             ++at_least_one;
         } else if (current_count == 1)
         {
+            // if the current value is 1, it must be in more than one collection
             ++many;
         }
         ++all;
@@ -479,6 +523,7 @@ public:
     int get_many() { return many; }
     int get_all() { return all; }
 private:
+    // maps record ID's to the number of collections in which they occur
     map<int, int> record_count;
     int at_least_one = 0, many = 0, all = 0;
 };
@@ -519,21 +564,26 @@ bool modify_title(data_container& lib_cat)
     auto record_iter = read_id_get_iter(lib_cat);
     Record *record_ptr = *record_iter;
 
+    // make sure the new title is not already in the library
     string title = title_read(cin);
     check_title_in_library(lib_cat, title);
 
+    // remove the record from all collections and remember what collections it is in
     list<Collection*> collections_with_record;
     for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), [&collections_with_record, record_ptr](Collection& collection)
         { if (collection.is_member_present(record_ptr)) { collection.remove_member(record_ptr); collections_with_record.push_back(&collection); }});
 
+    // remove the record from the library
     lib_cat.library_id.erase(record_iter);
-    assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Less_than_ptr<Record*>()));
+    assert(binary_search(lib_cat.library_title.begin(), lib_cat.library_title.end(), record_ptr, Title_compare()));
     lib_cat.library_title.erase(lib_title_lower_bound(lib_cat, record_ptr));
 
+    // change the record's title and add it back into the library
     string old_title = record_ptr->get_title();
     record_ptr->set_title(title);
     insert_record(lib_cat, record_ptr);
 
+    // add the record back into all the collections it was in
     for_each(collections_with_record.begin(), collections_with_record.end(), [record_ptr](Collection* collection) { collection->add_member(record_ptr); });
 
     cout << "Title for record " << record_ptr->get_ID() << " changed to " << title << "\n";
@@ -576,7 +626,7 @@ bool delete_record(data_container& lib_cat)
     }
     Record *record_ptr = *record_iter;
     lib_cat.library_title.erase(record_iter);
-    assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, record_id_comp()));
+    assert(binary_search(lib_cat.library_id.begin(), lib_cat.library_id.end(), record_ptr, ID_compare()));
     lib_cat.library_id.erase(lib_id_lower_bound(lib_cat, record_ptr));
     cout << "Record " << record_ptr->get_ID() << " " << record_ptr->get_title() << " deleted\n";
     delete record_ptr;
@@ -652,8 +702,8 @@ bool restore_all(data_container& lib_cat)
     {
         throw Error(FILE_OPEN_FAIL_MSG);
     }
-    int num;
-    if (!(file >> num))
+    int num_records;
+    if (!(file >> num_records))
     {
         throw Error(FILE_ERROR_MSG);
     }
@@ -662,16 +712,17 @@ bool restore_all(data_container& lib_cat)
     {
         Record::save_ID_counter();
         Record::reset_ID_counter();
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num_records; i++)
         {
             insert_record(new_lib_cat, new Record(file));
         }
-        if (!(file >> num))
+        int num_collections
+        if (!(file >> num_collections))
         {
             throw Error(FILE_ERROR_MSG);
 
         }
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < num_collections; i++)
         {
             insert_collection(new_lib_cat, Collection(file, new_lib_cat.library_title));
         }
