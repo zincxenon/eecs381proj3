@@ -35,7 +35,7 @@ public:
 	No check made for whether the Collection already exists or not.
 	Throw Error exception if invalid data discovered in file.
 	std::string data input is read directly into the member variable. */
-    Collection(std::ifstream& is, const vector<Record*>& library);
+    Collection(std::ifstream& is, const std::vector<Record*>& library);
 
 	// Accessors
 	std::string get_name() const
