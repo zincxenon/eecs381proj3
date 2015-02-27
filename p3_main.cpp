@@ -330,10 +330,11 @@ bool find_record(data_container& lib_cat)
 }
 struct string_finder
 {
-    string_finder(string key_) : key{key_} { cout << "key is " << key;}
+    string_finder(string key_) : key(string_to_lower(key_)) {}
     void operator()(Record* record)
     {
-        if (search(record->get_title().begin(), record->get_title().end(), key.begin(), key.end(), [](char a, char b){return tolower(a) == tolower(b);}) != record->get_title().end())
+        string temp_title = string_to_lower(record->get_title());
+        if (temp_title.find(key) != string::npos)
         {
             matching_records.push_back(record);
         }
@@ -342,6 +343,13 @@ struct string_finder
 private:
     list<Record*> matching_records;
     string key;
+
+    string& string_to_lower(string& original)
+    {
+        string new_string = original;
+        for_each(new_string.begin(), new_string.end(), tolower);
+        return new_string;
+    }
 };
 bool find_string(data_container& lib_cat)
 {
