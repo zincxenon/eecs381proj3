@@ -442,7 +442,7 @@ private:
 bool collection_statistics(data_container& lib_cat)
 {
     Collection_stats stats_helper;
-    for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), stats_helper);
+    stats_helper = for_each(lib_cat.catalog.begin(), lib_cat.catalog.end(), stats_helper);
 
     int lib_size = lib_cat.library_title.size();
     cout << stats_helper.get_one() << " out of " << lib_size << " Records appear in at least one Collection\n";
