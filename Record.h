@@ -74,7 +74,7 @@ public:
 
     bool operator==(const Record &rhs) const {return title == rhs.title || ID == rhs.ID; }
 
-    bool operator!=(const Record &rhs) const {return !(*this == rhs); }
+    bool operator!=(const Record &rhs) const {return title != rhs.title && ID != rhs.ID; }
 
     friend std::ostream& operator<< (std::ostream& os, const Record& record);
 

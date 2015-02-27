@@ -64,9 +64,9 @@ public:
 	bool operator< (const Collection& rhs) const
 		{ return name < rhs.get_name(); }
 
-	bool operator==(const Collection &rhs) const {return name == rhs.get_name(); }
+	bool operator==(const Collection &rhs) const {return name == rhs.name; }
 
-	bool operator!=(const Collection &rhs) const {return !(*this == rhs); }
+	bool operator!=(const Collection &rhs) const {return name != rhs.name; }
 	
 	friend std::ostream& operator<< (std::ostream& os, const Collection& collection);
 		
