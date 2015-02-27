@@ -631,7 +631,7 @@ bool restore_all(data_container& lib_cat)
         }
         for (int i = 0; i < num; i++)
         {
-            insert_collection(new_lib_cat, Collection(file, lib_cat.library_title));
+            insert_collection(new_lib_cat, Collection(file, new_lib_cat.library_title));
             num--;
         }
         lib_cat.catalog.clear();
