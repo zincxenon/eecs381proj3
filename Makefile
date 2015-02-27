@@ -4,16 +4,16 @@ LD = g++
 CFLAGS = -c -pedantic-errors -std=c++11 -Wall -fno-elide-constructors
 LFLAGS = -pedantic -Wall
 
-OBJS = p2_main.o Record.o Collection.o Utility.o
-PROG = p2exe
+OBJS = p3_main.o Record.o Collection.o Utility.o
+PROG = p3exe
 
 default: $(PROG)
 
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
 
-p2_main.o: p2_main.cpp Record.h Collection.h Utility.h
-	$(CC) $(CFLAGS) p2_main.cpp
+p3_main.o: p3_main.cpp Record.h Collection.h Utility.h
+	$(CC) $(CFLAGS) p3_main.cpp
 
 Record.o: Record.cpp Record.h Utility.h
 	$(CC) $(CFLAGS) Record.cpp

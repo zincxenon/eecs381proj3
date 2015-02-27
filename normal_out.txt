@@ -2,9 +2,6 @@
 Enter command: Memory allocations:
 Records: 0
 Collections: 0
-Lists: 3
-List Nodes: 0
-Strings: 0 with 0 bytes total
 
 Enter command: Library is empty
 
@@ -15,45 +12,30 @@ Enter command: Record 1 added
 Enter command: Memory allocations:
 Records: 1
 Collections: 0
-Lists: 3
-List Nodes: 2
-Strings: 2 with 11 bytes total
 
 Enter command: Record 2 added
 
 Enter command: Memory allocations:
 Records: 2
 Collections: 0
-Lists: 3
-List Nodes: 4
-Strings: 4 with 24 bytes total
 
 Enter command: Record 3 added
 
 Enter command: Memory allocations:
 Records: 3
 Collections: 0
-Lists: 3
-List Nodes: 6
-Strings: 6 with 42 bytes total
 
 Enter command: Record 4 added
 
 Enter command: Memory allocations:
 Records: 4
 Collections: 0
-Lists: 3
-List Nodes: 8
-Strings: 8 with 69 bytes total
 
 Enter command: Record 5 added
 
 Enter command: Memory allocations:
 Records: 5
 Collections: 0
-Lists: 3
-List Nodes: 10
-Strings: 10 with 89 bytes total
 
 Enter command: Library contains 5 records:
 3: DVD u Mars Attacks!
@@ -77,9 +59,6 @@ Enter command: Record 3 Mars Attacks! deleted
 Enter command: Memory allocations:
 Records: 4
 Collections: 0
-Lists: 3
-List Nodes: 8
-Strings: 8 with 71 bytes total
 
 Enter command: Library contains 4 records:
 4: DVD 5 Much Ado about Nothing
@@ -130,18 +109,12 @@ Enter command: All records deleted
 Enter command: Memory allocations:
 Records: 0
 Collections: 0
-Lists: 3
-List Nodes: 0
-Strings: 0 with 0 bytes total
 
 Enter command: Data loaded
 
 Enter command: Memory allocations:
 Records: 5
 Collections: 2
-Lists: 5
-List Nodes: 16
-Strings: 12 with 150 bytes total
 
 Enter command: Record 7 added
 
@@ -177,18 +150,12 @@ Collection favorites contains:
 Enter command: Memory allocations:
 Records: 6
 Collections: 1
-Lists: 4
-List Nodes: 14
-Strings: 13 with 158 bytes total
 
 Enter command: All data deleted
 
 Enter command: Memory allocations:
 Records: 0
 Collections: 0
-Lists: 3
-List Nodes: 0
-Strings: 0 with 0 bytes total
 
 Enter command: All data deleted
 Done

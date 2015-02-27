@@ -44,9 +44,6 @@ Enter command: Could not open file!
 Enter command: Memory allocations:
 Records: 2
 Collections: 1
-Lists: 4
-List Nodes: 6
-Strings: 5 with 39 bytes total
 
 Enter command: Library contains 2 records:
 2: DVD u Mars Attacks!
@@ -61,9 +58,6 @@ Enter command: Invalid data found in file!
 Enter command: Memory allocations:
 Records: 2
 Collections: 1
-Lists: 4
-List Nodes: 6
-Strings: 5 with 39 bytes total
 
 Enter command: Library contains 2 records:
 2: DVD u Mars Attacks!
