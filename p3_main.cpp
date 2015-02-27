@@ -178,7 +178,7 @@ vector<Record*>::iterator read_title_get_iter(data_container& lib_cat)
     string title = title_read(cin);
     Record temp_record(title);
     auto record_iter = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (record_iter == lib_cat.library_title.end() || (*record_iter)->get_title() != title)
+    if (record_iter == lib_cat.library_title.end() || **record_iter != temp_record)
     {
         throw Error("No record with that title!");
     }
@@ -192,7 +192,7 @@ vector<Record*>::iterator read_id_get_iter(data_container& lib_cat)
     for_each(lib_cat.library_id.begin(), lib_cat.library_id.end(), [](Record* record) {cout << "record here is " << *record << endl;});
     Record temp_record(id);
     auto record_iter = lower_bound(lib_cat.library_id.begin(), lib_cat.library_id.end(), &temp_record, record_id_comp());
-    if (record_iter == lib_cat.library_id.end() || (*record_iter)->get_ID() != id)
+    if (record_iter == lib_cat.library_id.end() || **record_iter != temp_record)
     {
         cout << "found id is " << (*record_iter)->get_ID() << endl;
         throw Error("No record with that ID!");
@@ -206,7 +206,7 @@ vector<Collection>::iterator read_name_get_iter(data_container& lib_cat)
     cin >> name;
     Collection temp_collection(name);
     auto collection_iter = lower_bound(lib_cat.catalog.begin(), lib_cat.catalog.end(), temp_collection);
-    if (collection_iter == lib_cat.catalog.end() || (*collection_iter).get_name() != name)
+    if (collection_iter == lib_cat.catalog.end() || **collection_iter != temp_collection)
     {
         throw Error("No collection with that name!");
     }
@@ -217,7 +217,7 @@ void check_title_in_library(data_container& lib_cat, string title)
 {
     Record temp_record(title);
     auto title_check = lower_bound(lib_cat.library_title.begin(), lib_cat.library_title.end(), &temp_record, Less_than_ptr<Record*>());
-    if (title_check != lib_cat.library_title.end() && (*title_check)->get_title() == title)
+    if (title_check != lib_cat.library_title.end() && **title_check == temp_record)
     {
         throw Error(TITLE_ALREADY_FOUND_MSG);
     }
